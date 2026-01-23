@@ -76,6 +76,11 @@ export default function Services() {
           ))}
         </div>
 
+
+<div className="p-6 bg-primary text-white text-2xl">
+  Tailwind Test: If this is maroon, Tailwind is working.
+</div>
+        
         <div className="text-center mt-12">
           <a href="/services" className="btn-primary inline-block">
             View All Services
