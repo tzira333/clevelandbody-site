@@ -18,7 +18,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
-    "resend": "^4.0.1",
+    "resend": "^4.8.0",
     "stripe": "^17.5.0",
     "twilio": "github:twilio/twilio-node",
     "zod": "^3.24.1"
