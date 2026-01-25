@@ -7,7 +7,7 @@ export default function PortalPage() {
         <div className="card text-center">
           <h2 className="text-2xl font-bold text-primary mb-4">Portal Coming Soon</h2>
           <p className="text-gray-700 mb-6">
-            We're building a customer portal where you'll be able to:
+            We are building a customer portal where you will be able to:
           </p>
           
           <ul className="text-left space-y-3 mb-8">
