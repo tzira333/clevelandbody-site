@@ -32,12 +32,7 @@ export default function Header() {
             >
               Schedule Appointment
             </Link>
-            <Link 
-              href="/portal" 
-              className="border-2 border-white px-6 py-2 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors"
-            >
-              Customer Portal
-            </Link>
+           
           </div>
 
           {/* Mobile Menu Button */}
@@ -72,13 +67,7 @@ export default function Header() {
             >
               Schedule Appointment
             </Link>
-            <Link 
-              href="/portal" 
-              className="block border-2 border-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Customer Portal
-            </Link>
+            
           </div>
         )}
       </nav>
