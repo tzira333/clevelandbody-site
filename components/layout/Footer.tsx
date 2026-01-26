@@ -13,7 +13,7 @@ export default function Footer() {
               DOMESTIC & FOREIGN<br />AUTO BODY INC.
             </h3>
             <p className="text-gray-300 mb-4">
-              Expert auto body repair and collision services in Cleveland, OH. Over 25 years of experience.
+              Expert auto body repair and collision services in Cleveland, OH. Over 40 years of experience.
             </p>
           </div>
 

@@ -19,7 +19,7 @@ export default function ReviewsPage() {
             <div className="text-yellow-500 text-xl">★★★★★</div>
           </div>
           <p className="text-gray-700 italic mb-3">
-            "Over 25 years of experience really shows. Professional, honest, and fair pricing."
+            "Over 40 years of experience really shows. Professional, honest, and fair pricing."
           </p>
           <p className="text-sm text-gray-600">— Cleveland Resident</p>
         </div>

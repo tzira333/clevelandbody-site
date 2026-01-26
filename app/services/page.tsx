@@ -6,7 +6,7 @@ export default function ServicesPage() {
       <div className="grid md:grid-cols-2 gap-8 mb-12">
         <div className="card">
           <h2 className="text-2xl font-bold text-primary mb-3">Collision Repair</h2>
-          <p className="text-gray-700">Major and minor collision repair with over 25 years of experience. We work with all insurance companies.</p>
+          <p className="text-gray-700">Major and minor collision repair with over 40 years of experience. We work with all insurance companies.</p>
         </div>
         
         <div className="card">

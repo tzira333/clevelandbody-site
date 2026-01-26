@@ -9,7 +9,7 @@ export default function Hero() {
             Expert Auto Body & Collision Repair in Cleveland
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-secondary-cream">
-            Over 25 years of experience serving domestic and foreign vehicles. Professional collision repair, custom painting, and restoration services.
+            Over 40 years of experience serving domestic and foreign vehicles. Professional collision repair, custom painting, and restoration services.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
@@ -57,7 +57,7 @@ export default function Hero() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p className="font-bold">25+ Years Experience</p>
+                <p className="font-bold">40+ years Experience</p>
                 <p className="text-sm text-secondary-cream">Expert technicians</p>
               </div>
             </div>
