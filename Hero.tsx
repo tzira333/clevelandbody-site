@@ -57,7 +57,7 @@ export default function Hero() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p className="font-bold">25+ Years Experience</p>
+                <p className="font-bold">40+ Years Experience</p>
                 <p className="text-sm text-secondary-cream">Expert technicians</p>
               </div>
             </div>

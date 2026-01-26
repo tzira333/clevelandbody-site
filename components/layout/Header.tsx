@@ -26,13 +26,9 @@ export default function Header() {
             <Link href="/gallery" className="hover:text-secondary-cream transition-colors">Gallery</Link>
             <Link href="/reviews" className="hover:text-secondary-cream transition-colors">Reviews</Link>
             <Link href="/contact" className="hover:text-secondary-cream transition-colors">Contact</Link>
-            <Link 
-              href="/schedule" 
-              className="bg-white text-primary px-6 py-2 rounded-lg font-semibold hover:bg-secondary-cream transition-colors"
-            >
-              Schedule Appointment
-            </Link>
-           
+            <Link href="/schedule" className="bg-white text-primary px-6 py-2 rounded-lg font-semibold hover:bg-secondary-cream transition-colors">Schedule Appointment</Link>
+           / Add this after the "Customer Portal" button in desktop nav
+            <Link href="/admin"  className="text-sm text-white/80 hover:text-white transition-colors">Staff Login</Link>
           </div>
 
           {/* Mobile Menu Button */}

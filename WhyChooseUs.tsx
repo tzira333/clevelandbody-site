@@ -2,7 +2,7 @@ export default function WhyChooseUs() {
   const reasons = [
     {
       title: 'Expert Technicians',
-      description: 'Our body men and painters each have over 25 years of experience in collision repair and custom painting.',
+      description: 'Our body men and painters each have over 40 years of experience in collision repair and custom painting.',
     },
     {
       title: 'All Insurance Welcome',
@@ -32,7 +32,7 @@ export default function WhyChooseUs() {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="section-heading">Why Choose Us</h2>
           <p className="section-subheading">
-            Cleveland's trusted auto body repair specialists for over 25 years
+            Cleveland's trusted auto body repair specialists for over 40 years
           </p>
         </div>
 
