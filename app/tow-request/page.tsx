@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import PhoneInput from '@/components/form/PhoneInput'
+import EmailInput from '@/components/form/EmailInput'
 
 export default function TowRequestPage() {
   const router = useRouter()
@@ -13,179 +15,217 @@ export default function TowRequestPage() {
     destination: '',
     vehicleInfo: '',
     message: '',
+    date: '',
+    time: ''
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitStatus('idle')
+    setLoading(true)
+    setError('')
 
     try {
       const response = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          date: new Date().toISOString().split('T')[0], // Today
-          time: new Date().toTimeString().split(' ')[0].slice(0, 5), // Current time
-          serviceType: `Tow Service: ${formData.location} → ${formData.destination}`,
-          vehicleInfo: formData.vehicleInfo,
-          message: `${formData.message}\n\nPickup: ${formData.location}\nDestination: ${formData.destination}`,
-        }),
+          ...formData,
+          serviceType: 'tow-service'
+        })
       })
 
-      if (response.ok) {
-        setSubmitStatus('success')
-        setTimeout(() => router.push('/'), 3000)
-      } else {
-        setSubmitStatus('error')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit tow request')
       }
-    } catch (error) {
-      console.error('Tow request error:', error)
-      setSubmitStatus('error')
+
+      setSuccess(true)
+      setTimeout(() => {
+        router.push('/')
+      }, 3000)
+    } catch (err: any) {
+      setError(err.message)
     } finally {
-      setIsSubmitting(false)
+      setLoading(false)
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">Request Tow Service</h1>
-        <p className="text-gray-700 mb-8">
-          Need a tow? We'll get your vehicle to our shop safely. Fill out the form below and we'll contact you immediately.
-        </p>
-
-        {submitStatus === 'success' && (
-          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-            ✓ Tow request received! We'll contact you shortly. Redirecting...
-          </div>
-        )}
-
-        {submitStatus === 'error' && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            ✗ Something went wrong. Please call us at <a href="tel:+12164818696" className="underline font-bold">(216) 481-8696</a>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="card space-y-6">
-          {/* Name */}
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Your Name *</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="John Doe"
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Phone Number *</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="(216) 555-1234"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="john@example.com"
-            />
-          </div>
-
-          {/* Pickup Location */}
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Pickup Location *</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="1234 Main St, Cleveland, OH"
-            />
-          </div>
-
-          {/* Destination */}
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Destination *</label>
-            <input
-              type="text"
-              name="destination"
-              value={formData.destination}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Our Shop or Your Preferred Location"
-            />
-            <p className="text-sm text-gray-600 mt-1">Leave blank if towing to our shop</p>
-          </div>
-
-          {/* Vehicle Info */}
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Vehicle Information *</label>
-            <input
-              type="text"
-              name="vehicleInfo"
-              value={formData.vehicleInfo}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="2020 Honda Civic"
-            />
-          </div>
-
-          {/* Additional Details */}
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Additional Details</label>
-            <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Any special instructions? (e.g., vehicle doesn't start, flat tire, accident)"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? 'Submitting...' : 'Request Tow Service'}
-          </button>
-
-          <p className="text-center text-gray-600 text-sm">
-            Or call us directly: <a href="tel:+12164818696" className="text-primary font-bold hover:underline">(216) 481-8696</a>
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="container mx-auto px-4 max-w-2xl">
+        <div className="bg-white rounded-lg shadow-md p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Request Tow Service
+          </h1>
+          <p className="text-gray-600 mb-8">
+            Need your vehicle towed? Fill out the form and we'll coordinate pickup and delivery.
           </p>
-        </form>
+
+          {success ? (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+              <div className="text-green-600 text-5xl mb-4">✓</div>
+              <h2 className="text-2xl font-bold text-green-900 mb-2">
+                Tow Request Received!
+              </h2>
+              <p className="text-green-700 mb-4">
+                We've received your tow service request. Our team will contact you shortly to arrange pickup.
+              </p>
+              <p className="text-sm text-green-600">
+                Redirecting to homepage...
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <PhoneInput
+                label="Phone Number *"
+                value={formData.phone}
+                onChange={(value) => setFormData({ ...formData, phone: value })}
+                required
+                placeholder="216-555-1234"
+              />
+
+              <EmailInput
+                label="Email Address *"
+                value={formData.email}
+                onChange={(value) => setFormData({ ...formData, email: value })}
+                required
+                placeholder="your.email@example.com"
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Current Location (Pickup Address) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                  placeholder="123 Main St, Cleveland, OH 44101"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Destination Address
+                </label>
+                <input
+                  type="text"
+                  value={formData.destination}
+                  onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                  placeholder="Our shop or another location"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Leave blank to tow to Domestic & Foreign Auto Body Inc.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Vehicle Information *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.vehicleInfo}
+                  onChange={(e) => setFormData({ ...formData, vehicleInfo: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                  placeholder="e.g., 2020 Honda Accord, Silver"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Preferred Pickup Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Preferred Pickup Time
+                  </label>
+                  <select
+                    value={formData.time}
+                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                  >
+                    <option value="">ASAP</option>
+                    <option value="8:00 AM">8:00 AM</option>
+                    <option value="9:00 AM">9:00 AM</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="1:00 PM">1:00 PM</option>
+                    <option value="2:00 PM">2:00 PM</option>
+                    <option value="3:00 PM">3:00 PM</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Additional Information
+                </label>
+                <textarea
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                  placeholder="Any special instructions or details we should know..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-maroon text-white py-3 px-6 rounded-lg font-semibold hover:bg-maroon-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Submitting...' : 'Request Tow Service'}
+              </button>
+
+              <p className="text-sm text-gray-500 text-center">
+                Emergency towing? Call us directly at{' '}
+                <a href="tel:+12164818696" className="text-maroon hover:underline font-semibold">
+                  (216) 481-8696
+                </a>
+              </p>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   )
