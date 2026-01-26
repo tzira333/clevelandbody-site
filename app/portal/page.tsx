@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
 interface Appointment {
   id: string
@@ -24,7 +24,6 @@ export default function CustomerPortalPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [appointments, setAppointments] = useState<Appointment[]>([])
-  const supabase = createClientComponentClient()
 
   const formatPhoneForDisplay = (phone: string) => {
     const cleaned = phone.replace(/\D/g, '')
@@ -53,23 +52,44 @@ export default function CustomerPortalPage() {
     setError('')
 
     try {
+      // Initialize Supabase client
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase configuration missing')
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseKey)
       const phoneVariations = formatPhoneForSearch(phoneNumber)
 
-      // Query with OR conditions for all phone variations
-      const { data, error: fetchError } = await supabase
-        .from('appointments')
-        .select('*')
-        .or(phoneVariations.map(p => `customer_phone.eq.${p}`).join(','))
-        .order('created_at', { ascending: false })
+      // Try to find appointments with any phone variation
+      let allAppointments: Appointment[] = []
 
-      if (fetchError) throw fetchError
+      for (const phoneVar of phoneVariations) {
+        const { data, error: fetchError } = await supabase
+          .from('appointments')
+          .select('*')
+          .eq('customer_phone', phoneVar)
+          .order('created_at', { ascending: false })
 
-      if (!data || data.length === 0) {
+        if (data && data.length > 0) {
+          allAppointments = [...allAppointments, ...data]
+        }
+      }
+
+      // Remove duplicates by id
+      const uniqueAppointments = allAppointments.filter(
+        (appointment, index, self) =>
+          index === self.findIndex((a) => a.id === appointment.id)
+      )
+
+      if (uniqueAppointments.length === 0) {
         setError('No appointments found for this phone number. Please check the number or contact us at (216) 481-8696.')
         return
       }
 
-      setAppointments(data)
+      setAppointments(uniqueAppointments)
       setStep('appointments')
     } catch (err) {
       console.error('Portal login error:', err)
