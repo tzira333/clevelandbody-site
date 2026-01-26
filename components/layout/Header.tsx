@@ -7,7 +7,8 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="bg-primary text-white shadow-lg sticky top-0 z-50">
+    
+      <header className="bg-primary text-white shadow-lg sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -27,8 +28,12 @@ export default function Header() {
             <Link href="/gallery" className="hover:text-secondary-cream transition-colors">Gallery</Link>
             <Link href="/reviews" className="hover:text-secondary-cream transition-colors">Reviews</Link>
             <Link href="/contact" className="hover:text-secondary-cream transition-colors">Contact</Link>
+ <Link href="/portal" className="border-2 border-white px-6 py-2 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors">
+  Customer Portal
+</Link>
             <Link href="/schedule" className="bg-white text-primary px-6 py-2 rounded-lg font-semibold hover:bg-secondary-cream transition-colors">Schedule Appointment</Link>
             <Link href="/admin"  className="text-sm text-white/80 hover:text-white transition-colors">Staff Login</Link>
+
           </div>
 
           {/* Mobile Menu Button */}
@@ -56,6 +61,12 @@ export default function Header() {
             <Link href="/gallery" className="block py-2 hover:text-secondary-cream transition-colors" onClick={() => setMobileMenuOpen(false)}>Gallery</Link>
             <Link href="/reviews" className="block py-2 hover:text-secondary-cream transition-colors" onClick={() => setMobileMenuOpen(false)}>Reviews</Link>
             <Link href="/contact" className="block py-2 hover:text-secondary-cream transition-colors" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+           <Link 
+  href="/portal" 
+  className="block border-2 border-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors text-center"
+  onClick={() => setMobileMenuOpen(false)}
+>Customer Portal
+</Link>
             <Link 
               href="/schedule" 
               className="block bg-white text-primary px-6 py-3 rounded-lg font-semibold hover:bg-secondary-cream transition-colors text-center"
