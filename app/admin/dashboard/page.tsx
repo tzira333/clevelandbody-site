@@ -4,14 +4,6 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
 interface Appointment {
   id: string
   customer_name: string
@@ -45,6 +37,12 @@ export default function AdminDashboard() {
   const [expandedAppointment, setExpandedAppointment] = useState<string | null>(null)
   const [photoModalUrl, setPhotoModalUrl] = useState<string | null>(null)
   const router = useRouter()
+
+  // Initialize Supabase client inside component
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   useEffect(() => {
     checkAuth()
@@ -117,7 +115,6 @@ export default function AdminDashboard() {
 
       if (error) throw error
 
-      // Update local state
       setAppointments(prev =>
         prev.map(apt => apt.id === id ? { ...apt, status: newStatus } : apt)
       )
@@ -159,7 +156,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Photo Modal */}
       {photoModalUrl && (
         <div
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
@@ -181,7 +177,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Header */}
       <div className="bg-primary text-white shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
@@ -198,7 +193,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Filters and Search */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
@@ -206,46 +200,19 @@ export default function AdminDashboard() {
                 Filter by Status
               </label>
               <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => setFilter('all')}
-                  className={`px-4 py-2 rounded-lg font-semibold ${
-                    filter === 'all'
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setFilter('pending')}
-                  className={`px-4 py-2 rounded-lg font-semibold ${
-                    filter === 'pending'
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  Pending
-                </button>
-                <button
-                  onClick={() => setFilter('confirmed')}
-                  className={`px-4 py-2 rounded-lg font-semibold ${
-                    filter === 'confirmed'
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  Confirmed
-                </button>
-                <button
-                  onClick={() => setFilter('completed')}
-                  className={`px-4 py-2 rounded-lg font-semibold ${
-                    filter === 'completed'
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  Completed
-                </button>
+                {(['all', 'pending', 'confirmed', 'completed'] as const).map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setFilter(status)}
+                    className={`px-4 py-2 rounded-lg font-semibold ${
+                      filter === status
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -264,33 +231,20 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="grid md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Total</div>
-            <div className="text-3xl font-bold text-primary">{appointments.length}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Pending</div>
-            <div className="text-3xl font-bold text-yellow-600">
-              {appointments.filter(a => a.status === 'pending').length}
+          {[
+            { label: 'Total', count: appointments.length, color: 'text-primary' },
+            { label: 'Pending', count: appointments.filter(a => a.status === 'pending').length, color: 'text-yellow-600' },
+            { label: 'Confirmed', count: appointments.filter(a => a.status === 'confirmed').length, color: 'text-blue-600' },
+            { label: 'Completed', count: appointments.filter(a => a.status === 'completed').length, color: 'text-green-600' },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-white rounded-lg shadow p-6">
+              <div className="text-sm text-gray-600 mb-1">{stat.label}</div>
+              <div className={`text-3xl font-bold ${stat.color}`}>{stat.count}</div>
             </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Confirmed</div>
-            <div className="text-3xl font-bold text-blue-600">
-              {appointments.filter(a => a.status === 'confirmed').length}
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Completed</div>
-            <div className="text-3xl font-bold text-green-600">
-              {appointments.filter(a => a.status === 'completed').length}
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Appointments List */}
         <div className="space-y-4">
           {loading ? (
             <div className="bg-white rounded-lg shadow p-8 text-center text-gray-600">
@@ -310,7 +264,6 @@ export default function AdminDashboard() {
                   key={appointment.id}
                   className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
                 >
-                  {/* Compact View */}
                   <div
                     className="p-6 cursor-pointer"
                     onClick={() => toggleAppointmentDetails(appointment.id)}
@@ -326,10 +279,7 @@ export default function AdminDashboard() {
                           </span>
                           {photoCount > 0 && (
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+                              📷 {photoCount}
                             </span>
                           )}
                         </div>
@@ -361,11 +311,9 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Expanded Details */}
                   {isExpanded && (
                     <div className="border-t px-6 py-4 bg-gray-50">
                       <div className="grid md:grid-cols-2 gap-6 mb-4">
-                        {/* Contact Info */}
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-3">Contact Information</h4>
                           <div className="space-y-2 text-sm">
@@ -383,22 +331,9 @@ export default function AdminDashboard() {
                                 </a>
                               </div>
                             )}
-                            <div>
-                              <span className="text-gray-600">Submitted:</span>{' '}
-                              <span className="font-semibold">
-                                {new Date(appointment.created_at).toLocaleDateString('en-US', {
-                                  month: 'long',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                })}
-                              </span>
-                            </div>
                           </div>
                         </div>
 
-                        {/* Status Update */}
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-3">Update Status</h4>
                           <select
@@ -416,7 +351,6 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      {/* Customer Notes */}
                       {appointment.message && (
                         <div className="mb-4">
                           <h4 className="font-semibold text-gray-900 mb-2">Customer Notes</h4>
@@ -426,13 +360,9 @@ export default function AdminDashboard() {
                         </div>
                       )}
 
-                      {/* Customer Photos */}
-                      {photoCount > 0 && (
+                      {photoCount > 0 ? (
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                          <h4 className="font-semibold text-gray-900 mb-3">
                             Customer Photos ({photoCount})
                           </h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -450,27 +380,14 @@ export default function AdminDashboard() {
                                   alt={photo.caption}
                                   className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 group-hover:border-primary transition-colors"
                                 />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 rounded-lg transition-colors flex items-center justify-center">
-                                  <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                  </svg>
-                                </div>
                                 <p className="text-xs text-gray-600 mt-1 truncate">{photo.caption}</p>
-                                <p className="text-xs text-gray-500">
-                                  {new Date(photo.created_at).toLocaleDateString()}
-                                </p>
                               </div>
                             ))}
                           </div>
                         </div>
-                      )}
-
-                      {photoCount === 0 && (
+                      ) : (
                         <div className="text-center py-8 bg-white rounded-lg border-2 border-dashed border-gray-300">
-                          <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <p className="text-gray-600">No photos uploaded by customer yet</p>
+                          <p className="text-gray-600">No photos uploaded yet</p>
                         </div>
                       )}
                     </div>
