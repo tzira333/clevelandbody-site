@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Helper function to normalize phone numbers
 function normalizePhoneNumber(phone: string): string {
-  // Remove all non-digit characters
   const digits = phone.replace(/\D/g, '')
+  let cleaned = digits
   
-  // If it's 11 digits and starts with 1, remove the 1
+  // Remove leading 1 if 11 digits
   if (digits.length === 11 && digits[0] === '1') {
-    return digits.substring(1)
+    cleaned = digits.substring(1)
+  } else if (digits.length === 10) {
+    cleaned = digits
+  } else {
+    cleaned = digits.substring(0, 10)
   }
   
-  // Return just the 10 digits
-  return digits.substring(0, 10)
+  // Format as xxx-xxx-xxxx
+  if (cleaned.length === 10) {
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`
+  }
+  
+  return phone
 }
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

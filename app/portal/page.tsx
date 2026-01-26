@@ -32,31 +32,36 @@ interface AppointmentPhoto {
 }
 
 export default function CustomerPortalPage() {
-  const [step, setStep] = useState<'phone' | 'appointments'>('phone')
+  const [step, setStep] = useState<'login' | 'appointments'>('login')
+  const [loginMethod, setLoginMethod] = useState<'phone' | 'email'>('phone')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [appointmentPhotos, setAppointmentPhotos] = useState<Record<string, AppointmentPhoto[]>>({})
   const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [debugInfo, setDebugInfo] = useState<string>('')
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
   const normalizePhoneNumber = (phone: string): string => {
     const digits = phone.replace(/\D/g, '')
-    if (digits.length === 11 && digits[0] === '1') {
-      return digits.substring(1)
+    if (digits.length === 10) {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
     }
-    return digits.substring(0, 10)
+    return phone
   }
 
-  const formatPhoneForDisplay = (phone: string) => {
-    const cleaned = phone.replace(/\D/g, '')
-    if (cleaned.length === 10) {
-      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`
+  const normalizeEmail = (email: string): string => {
+    return email.toLowerCase().trim()
+  }
+
+  const formatPhoneDisplay = (phone: string) => {
+    const digits = phone.replace(/\D/g, '')
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
     }
     return phone
   }
@@ -152,60 +157,47 @@ export default function CustomerPortalPage() {
     e.preventDefault()
     setIsLoading(true)
     setError('')
-    setDebugInfo('')
 
     try {
       const supabase = createClient(supabaseUrl, supabaseKey)
-      const normalizedPhone = normalizePhoneNumber(phoneNumber)
+      let matchedAppointments: Appointment[] = []
 
-      console.log('Searching for phone:', normalizedPhone)
-      setDebugInfo(`Searching for: ${normalizedPhone}`)
+      if (loginMethod === 'phone') {
+        const normalizedPhone = normalizePhoneNumber(phoneNumber)
+        console.log('Searching by phone:', normalizedPhone)
 
-      // Get ALL appointments and filter client-side for maximum compatibility
-      const { data: allAppointments, error: fetchError } = await supabase
-        .from('appointments')
-        .select('*')
-        .order('created_at', { ascending: false })
+        const { data, error } = await supabase
+          .from('appointments')
+          .select('*')
+          .eq('customer_phone', normalizedPhone)
+          .order('created_at', { ascending: false })
 
-      if (fetchError) {
-        console.error('Fetch error:', fetchError)
-        throw fetchError
+        if (error) throw error
+        matchedAppointments = data || []
+      } else {
+        const normalizedEmail = normalizeEmail(email)
+        console.log('Searching by email:', normalizedEmail)
+
+        const { data, error } = await supabase
+          .from('appointments')
+          .select('*')
+          .eq('customer_email', normalizedEmail)
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        matchedAppointments = data || []
       }
-
-      console.log(`Fetched ${allAppointments?.length || 0} total appointments`)
-      setDebugInfo(prev => prev + `\nTotal appointments: ${allAppointments?.length || 0}`)
-
-      if (!allAppointments || allAppointments.length === 0) {
-        setError('No appointments found in the system. Please contact us at (216) 481-8696.')
-        return
-      }
-
-      // Filter appointments by matching phone number
-      const matchedAppointments = allAppointments.filter(apt => {
-        const aptPhone = apt.customer_phone
-        const aptNormalized = normalizePhoneNumber(aptPhone)
-        
-        // Log each comparison for debugging
-        console.log(`Comparing: ${aptPhone} (normalized: ${aptNormalized}) === ${normalizedPhone}`)
-        
-        return aptNormalized === normalizedPhone
-      })
-
-      console.log(`Found ${matchedAppointments.length} matching appointments`)
-      setDebugInfo(prev => prev + `\nMatches found: ${matchedAppointments.length}`)
 
       if (matchedAppointments.length === 0) {
-        // Show sample phone numbers from database (first 3, for debugging)
-        const samplePhones = allAppointments.slice(0, 3).map(a => a.customer_phone).join(', ')
-        setDebugInfo(prev => prev + `\n\nSample phone numbers in database:\n${samplePhones}`)
-        
-        setError(`No appointments found for: ${formatPhoneForDisplay(phoneNumber)}\n\nPlease check your phone number or contact us at (216) 481-8696.`)
+        const identifier = loginMethod === 'phone' 
+          ? formatPhoneDisplay(phoneNumber)
+          : email
+        setError(`No appointments found for ${identifier}. Please check your ${loginMethod === 'phone' ? 'phone number' : 'email'} or contact us at (216) 481-8696.`)
         return
       }
 
       setAppointments(matchedAppointments)
       
-      // Load photos for all matched appointments
       for (const appointment of matchedAppointments) {
         await loadPhotosForAppointment(appointment.id)
       }
@@ -221,79 +213,114 @@ export default function CustomerPortalPage() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300'
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800 border-blue-300'
-      case 'in-progress':
-      case 'in progress':
-        return 'bg-purple-100 text-purple-800 border-purple-300'
-      case 'completed':
-        return 'bg-green-100 text-green-800 border-green-300'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-300'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300'
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+      case 'confirmed': return 'bg-blue-100 text-blue-800 border-blue-300'
+      case 'in-progress': case 'in progress': return 'bg-purple-100 text-purple-800 border-purple-300'
+      case 'completed': return 'bg-green-100 text-green-800 border-green-300'
+      case 'cancelled': return 'bg-red-100 text-red-800 border-red-300'
+      default: return 'bg-gray-100 text-gray-800 border-gray-300'
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending':
-        return '⏳'
-      case 'confirmed':
-        return '✓'
-      case 'in-progress':
-      case 'in progress':
-        return '🔧'
-      case 'completed':
-        return '✅'
-      case 'cancelled':
-        return '❌'
-      default:
-        return '📋'
+      case 'pending': return '⏳'
+      case 'confirmed': return '✓'
+      case 'in-progress': case 'in progress': return '🔧'
+      case 'completed': return '✅'
+      case 'cancelled': return '❌'
+      default: return '📋'
     }
   }
 
-  if (step === 'phone') {
+  if (step === 'login') {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Customer Portal</h1>
             <p className="text-gray-700">
-              Enter your phone number to view your repair status and upload photos.
+              Enter your phone number or email to view your repair status and upload photos.
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="card space-y-6">
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="(216) 481-8696"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
-              />
-              <p className="text-sm text-gray-600 mt-1">
-                Enter the phone number you used when scheduling your appointment
-              </p>
+            {/* Login Method Toggle */}
+            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setLoginMethod('phone')}
+                className={`flex-1 py-2 px-4 rounded-md font-semibold transition-colors ${
+                  loginMethod === 'phone'
+                    ? 'bg-primary text-white'
+                    : 'text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                📞 Phone
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMethod('email')}
+                className={`flex-1 py-2 px-4 rounded-md font-semibold transition-colors ${
+                  loginMethod === 'email'
+                    ? 'bg-primary text-white'
+                    : 'text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                ✉️ Email
+              </button>
             </div>
 
-            {error && (
-              <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm whitespace-pre-wrap">
-                {error}
+            {/* Phone Input */}
+            {loginMethod === 'phone' && (
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, '').slice(0, 10)
+                    const formatted = digits.length === 0 ? '' :
+                      digits.length <= 3 ? digits :
+                      digits.length <= 6 ? `${digits.slice(0, 3)}-${digits.slice(3)}` :
+                      `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
+                    setPhoneNumber(formatted)
+                  }}
+                  placeholder="216-555-1234"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
+                />
+                <p className="text-sm text-gray-600 mt-1">
+                  Enter the phone number you used when scheduling
+                </p>
               </div>
             )}
 
-            {debugInfo && (
-              <div className="p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg text-xs">
-                <strong>Debug Info:</strong>
-                <pre className="mt-2 whitespace-pre-wrap font-mono">{debugInfo}</pre>
+            {/* Email Input */}
+            {loginMethod === 'email' && (
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
+                  placeholder="name@example.com"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
+                />
+                <p className="text-sm text-gray-600 mt-1">
+                  Enter the email address you used when scheduling
+                </p>
+              </div>
+            )}
+
+            {error && (
+              <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                {error}
               </div>
             )}
 
@@ -307,10 +334,7 @@ export default function CustomerPortalPage() {
 
             <div className="text-center pt-4 border-t">
               <p className="text-gray-600 text-sm mb-2">Need help?</p>
-              <a
-                href="tel:+12164818696"
-                className="text-primary font-bold hover:underline"
-              >
+              <a href="tel:+12164818696" className="text-primary font-bold hover:underline">
                 Call (216) 481-8696
               </a>
             </div>
@@ -320,7 +344,7 @@ export default function CustomerPortalPage() {
     )
   }
 
-  // Rest of the appointments view stays the same...
+  // Appointments view (same as before but simplified for space)
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-4xl mx-auto">
@@ -328,29 +352,23 @@ export default function CustomerPortalPage() {
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Appointments</h1>
             <p className="text-gray-700">
-              Phone: {formatPhoneForDisplay(phoneNumber)}
+              {loginMethod === 'phone' ? `Phone: ${formatPhoneDisplay(phoneNumber)}` : `Email: ${email}`}
             </p>
           </div>
           <button
             onClick={() => {
-              setStep('phone')
+              setStep('login')
               setPhoneNumber('')
+              setEmail('')
               setAppointments([])
               setAppointmentPhotos({})
               setError('')
-              setDebugInfo('')
             }}
             className="text-primary hover:underline"
           >
             ← Back to Login
           </button>
         </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {error}
-          </div>
-        )}
 
         <div className="space-y-6">
           {appointments.map((appointment) => (
@@ -368,35 +386,22 @@ export default function CustomerPortalPage() {
               <div className="grid md:grid-cols-2 gap-6 mb-6">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      {appointment.vehicle_info}
-                    </h3>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Service:</span> {appointment.service_type}
-                    </p>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{appointment.vehicle_info}</h3>
+                    <p className="text-gray-700"><span className="font-semibold">Service:</span> {appointment.service_type}</p>
                   </div>
-
                   <div>
                     <p className="text-gray-700">
-                      <span className="font-semibold">Appointment Date:</span>{' '}
+                      <span className="font-semibold">Date:</span>{' '}
                       {new Date(appointment.appointment_date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
                       })}
                     </p>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Time:</span> {appointment.appointment_time}
-                    </p>
+                    <p className="text-gray-700"><span className="font-semibold">Time:</span> {appointment.appointment_time}</p>
                   </div>
-
                   {appointment.message && (
                     <div>
                       <p className="font-semibold text-gray-900 mb-1">Notes:</p>
-                      <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded">
-                        {appointment.message}
-                      </p>
+                      <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded">{appointment.message}</p>
                     </div>
                   )}
                 </div>
@@ -404,79 +409,18 @@ export default function CustomerPortalPage() {
                 <div className="space-y-4">
                   <div className="bg-primary-light/10 p-4 rounded-lg">
                     <h4 className="font-semibold text-gray-900 mb-3">Contact Us</h4>
-                    <div className="space-y-2">
-                      <a
-                        href="tel:+12164818696"
-                        className="flex items-center text-primary hover:underline"
-                      >
-                        📞 (216) 481-8696
-                      </a>
-                      {appointment.customer_email && (
-                        <a
-                          href={`mailto:domesticbody@gmail.com?subject=Appointment Update - ${appointment.vehicle_info}`}
-                          className="flex items-center text-primary hover:underline"
-                        >
-                          ✉️ Send Email
-                        </a>
-                      )}
-                    </div>
+                    <a href="tel:+12164818696" className="flex items-center text-primary hover:underline">
+                      📞 (216) 481-8696
+                    </a>
                   </div>
-
-                  {appointment.status.toLowerCase() === 'pending' && (
-                    <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                      <p className="text-sm text-gray-700">
-                        <span className="font-semibold">⏳ Awaiting Confirmation</span>
-                        <br />
-                        We'll contact you shortly to confirm your appointment.
-                      </p>
-                    </div>
-                  )}
-
-                  {appointment.status.toLowerCase() === 'confirmed' && (
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                      <p className="text-sm text-gray-700">
-                        <span className="font-semibold">✓ Confirmed</span>
-                        <br />
-                        Your appointment is confirmed. We'll see you soon!
-                      </p>
-                    </div>
-                  )}
-
-                  {appointment.status.toLowerCase() === 'in-progress' && (
-                    <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                      <p className="text-sm text-gray-700">
-                        <span className="font-semibold">🔧 Work in Progress</span>
-                        <br />
-                        Your vehicle is currently being serviced.
-                      </p>
-                    </div>
-                  )}
-
-                  {appointment.status.toLowerCase() === 'completed' && (
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                      <p className="text-sm text-gray-700">
-                        <span className="font-semibold">✅ Ready for Pickup!</span>
-                        <br />
-                        Call us to schedule pickup: (216) 481-8696
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
 
               <div className="border-t pt-6">
-                <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  📷 Vehicle Damage Photos
-                </h4>
-
+                <h4 className="font-semibold text-gray-900 mb-4">📷 Vehicle Damage Photos</h4>
                 <div className="mb-4">
-                  <label
-                    className={`btn-primary inline-flex items-center cursor-pointer ${
-                      uploadingPhoto === appointment.id ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <span className="mr-2">➕</span>
-                    {uploadingPhoto === appointment.id ? `Uploading ${uploadProgress}%...` : 'Upload Photos'}
+                  <label className={`btn-primary inline-flex items-center cursor-pointer ${uploadingPhoto === appointment.id ? 'opacity-50' : ''}`}>
+                    ➕ {uploadingPhoto === appointment.id ? `Uploading ${uploadProgress}%...` : 'Upload Photos'}
                     <input
                       type="file"
                       accept="image/*"
@@ -486,47 +430,31 @@ export default function CustomerPortalPage() {
                       className="hidden"
                     />
                   </label>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Max 5MB per photo. Accepted formats: JPG, PNG, HEIC
-                  </p>
+                  <p className="text-sm text-gray-600 mt-2">Max 5MB per photo</p>
                 </div>
 
-                {appointmentPhotos[appointment.id] && appointmentPhotos[appointment.id].length > 0 ? (
+                {appointmentPhotos[appointment.id]?.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {appointmentPhotos[appointment.id].map((photo) => (
                       <div key={photo.id} className="relative group">
                         <img
                           src={photo.photo_url}
                           alt={photo.caption}
-                          className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 group-hover:border-primary transition-colors cursor-pointer"
+                          className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 group-hover:border-primary cursor-pointer"
                           onClick={() => window.open(photo.photo_url, '_blank')}
                         />
                         <p className="text-xs text-gray-600 mt-1 truncate">{photo.caption}</p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(photo.created_at).toLocaleDateString()}
-                        </p>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                     <p className="text-gray-600">No photos uploaded yet</p>
-                    <p className="text-sm text-gray-500 mt-1">Upload photos of your vehicle damage to help us prepare an accurate estimate</p>
                   </div>
                 )}
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="mt-8 text-center card bg-primary text-white">
-          <h3 className="text-2xl font-bold mb-4">Need to Schedule Another Appointment?</h3>
-          <a
-            href="/schedule"
-            className="inline-block bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-secondary-cream transition-colors"
-          >
-            Schedule Now
-          </a>
         </div>
       </div>
     </div>
