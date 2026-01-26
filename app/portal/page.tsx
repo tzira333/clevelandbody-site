@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
+
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 interface Appointment {
   id: string
