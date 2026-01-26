@@ -11,12 +11,13 @@ export default function Header() {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
+          
           <Link href="/" className="text-2xl font-bold hover:opacity-90 transition-opacity">
-            <div className="flex flex-col">
-              <span className="text-sm font-normal">DOMESTIC & FOREIGN</span>
-              <span>AUTO BODY INC.</span>
-            </div>
-          </Link>
+  <div className="flex flex-col">
+    <span className="text-xl font-normal">DOMESTIC & FOREIGN</span>
+    <span>AUTO BODY INC.</span>
+  </div>
+</Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
@@ -69,7 +70,7 @@ export default function Header() {
 
       {/* Contact Info Bar */}
       <div className="bg-primary-dark">
-        <div className="container mx-auto px-4 py-2 flex flex-col sm:flex-row justify-between items-center text-sm">
+  <div className="container mx-auto px-4 py-1 flex flex-col sm:flex-row justify-between items-center text-sm">
           <div className="flex items-center space-x-4 mb-2 sm:mb-0">
             <a href="tel:+12164818696" className="hover:text-secondary-cream transition-colors flex items-center">
               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
