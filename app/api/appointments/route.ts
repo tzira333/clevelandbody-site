@@ -74,7 +74,8 @@ Submitted: ${new Date().toLocaleString()}
       const twilioPromise = (async () => {
         try {
           const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-          const phoneNumbers = process.env.NOTIFICATION_PHONE_NUMBERS.split(',')
+          const notificationPhones = process.env.NOTIFICATION_PHONE_NUMBERS!
+          const phoneNumbers = notificationPhones.split(',')
           const smsPromises = phoneNumbers.map((phoneNumber: string) =>
             twilio.messages.create({
               body: smsMessage,
@@ -96,7 +97,8 @@ Submitted: ${new Date().toLocaleString()}
         try {
           const { Resend } = require('resend')
           const resend = new Resend(process.env.RESEND_API_KEY)
-          const emailAddresses = process.env.NOTIFICATION_EMAILS.split(',')
+          const notificationEmails = process.env.NOTIFICATION_EMAILS!
+          const emailAddresses = notificationEmails.split(',')
           await resend.emails.send({
             from: 'Domestic & Foreign Auto Body <notifications@clevelandbody.com>',
             to: emailAddresses.map((email: string) => email.trim()),
