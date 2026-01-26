@@ -4,10 +4,36 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+
+
+export default function AdminDashboard() {
+  const [supabase] = useState(() => {
+    if (typeof window === 'undefined') return null
+    return createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  })
+  
+  // ... rest of your code
+  
+  // Update all supabase calls to check if it exists:
+  const checkAuth = async () => {
+    if (!supabase) return
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      router.push('/admin')
+    }
+  }
+  
+  const fetchAppointments = async () => {
+    if (!supabase) return
+    // ... rest of fetchAppointments
+  }
+  
+  // etc for all supabase calls
+}
+
 
 interface Appointment {
   id: string
