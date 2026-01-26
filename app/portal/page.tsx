@@ -37,9 +37,23 @@ export default function CustomerPortalPage() {
   const [appointmentPhotos, setAppointmentPhotos] = useState<Record<string, AppointmentPhoto[]>>({})
   const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [debugInfo, setDebugInfo] = useState<string>('')
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+  const normalizePhoneNumber = (phone: string): string => {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '')
+    
+    // If it's 11 digits and starts with 1, remove the 1
+    if (digits.length === 11 && digits[0] === '1') {
+      return digits.substring(1)
+    }
+    
+    // Return just the 10 digits
+    return digits.substring(0, 10)
+  }
 
   const formatPhoneForDisplay = (phone: string) => {
     const cleaned = phone.replace(/\D/g, '')
@@ -47,16 +61,6 @@ export default function CustomerPortalPage() {
       return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`
     }
     return phone
-  }
-
-  const formatPhoneForSearch = (phone: string) => {
-    const digits = phone.replace(/\D/g, '')
-    return [
-      digits,
-      `+1${digits}`,
-      `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`,
-      `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`,
-    ]
   }
 
   const loadPhotosForAppointment = async (appointmentId: string) => {
@@ -93,21 +97,17 @@ export default function CustomerPortalPage() {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         
-        // Validate file type
         if (!file.type.startsWith('image/')) {
           throw new Error(`${file.name} is not an image file`)
         }
 
-        // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
           throw new Error(`${file.name} is too large. Max size is 5MB`)
         }
 
-        // Generate unique filename
         const fileExt = file.name.split('.').pop()
         const fileName = `${appointmentId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
 
-        // Upload to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('customer-photos')
           .upload(fileName, file, {
@@ -117,12 +117,10 @@ export default function CustomerPortalPage() {
 
         if (uploadError) throw uploadError
 
-        // Get public URL
         const { data: urlData } = supabase.storage
           .from('customer-photos')
           .getPublicUrl(fileName)
 
-        // Save photo record to database
         const { data: photoRecord, error: dbError } = await supabase
           .from('appointment_photos')
           .insert({
@@ -141,10 +139,7 @@ export default function CustomerPortalPage() {
         setUploadProgress(Math.round(((i + 1) / files.length) * 100))
       }
 
-      // Reload photos for this appointment
       await loadPhotosForAppointment(appointmentId)
-
-      // Show success message
       alert(`Successfully uploaded ${uploadedPhotos.length} photo(s)!`)
     } catch (err: any) {
       console.error('Photo upload error:', err)
@@ -159,44 +154,104 @@ export default function CustomerPortalPage() {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    setDebugInfo('')
 
     try {
       const supabase = createClient(supabaseUrl, supabaseKey)
-      const phoneVariations = formatPhoneForSearch(phoneNumber)
+      const normalizedPhone = normalizePhoneNumber(phoneNumber)
 
-      let allAppointments: Appointment[] = []
+      // First, get ALL appointments to debug
+      const { data: allAppointments, error: allError } = await supabase
+        .from('appointments')
+        .select('id, customer_name, customer_phone')
+        .limit(5)
 
-      for (const phoneVar of phoneVariations) {
-        const { data, error: fetchError } = await supabase
+      if (allError) {
+        console.error('Error fetching all appointments:', allError)
+      } else {
+        console.log('Sample appointments in database:', allAppointments)
+        setDebugInfo(`Found ${allAppointments?.length || 0} total appointments in database. Searching for: ${normalizedPhone}`)
+      }
+
+      // Try multiple search strategies
+      console.log('Searching for normalized phone:', normalizedPhone)
+
+      // Strategy 1: Direct match on normalized digits
+      let { data: matchedAppointments, error: fetchError } = await supabase
+        .from('appointments')
+        .select('*')
+        .or(`customer_phone.eq.${normalizedPhone},customer_phone.eq.+1${normalizedPhone},customer_phone.eq.(${normalizedPhone.slice(0,3)}) ${normalizedPhone.slice(3,6)}-${normalizedPhone.slice(6)},customer_phone.eq.${normalizedPhone.slice(0,3)}-${normalizedPhone.slice(3,6)}-${normalizedPhone.slice(6)}`)
+        .order('created_at', { ascending: false })
+
+      if (fetchError) {
+        console.error('Supabase query error:', fetchError)
+        throw fetchError
+      }
+
+      // Strategy 2: If no matches, try using LIKE with wildcards
+      if (!matchedAppointments || matchedAppointments.length === 0) {
+        console.log('No exact matches, trying LIKE search...')
+        
+        const { data: likeMatches, error: likeError } = await supabase
           .from('appointments')
           .select('*')
-          .eq('customer_phone', phoneVar)
+          .ilike('customer_phone', `%${normalizedPhone.slice(-10)}%`)
           .order('created_at', { ascending: false })
 
-        if (data && data.length > 0) {
-          allAppointments = [...allAppointments, ...data]
+        if (likeError) {
+          console.error('LIKE query error:', likeError)
+        } else {
+          matchedAppointments = likeMatches
+          console.log('LIKE search results:', likeMatches)
         }
       }
 
-      const uniqueAppointments = allAppointments.filter(
-        (appointment, index, self) =>
-          index === self.findIndex((a) => a.id === appointment.id)
-      )
+      // Strategy 3: If still no matches, get ALL and filter in JavaScript
+      if (!matchedAppointments || matchedAppointments.length === 0) {
+        console.log('No LIKE matches, trying client-side filtering...')
+        
+        const { data: allData, error: allError } = await supabase
+          .from('appointments')
+          .select('*')
+          .order('created_at', { ascending: false })
 
-      if (uniqueAppointments.length === 0) {
-        setError('No appointments found for this phone number. Please check the number or contact us at (216) 481-8696.')
+        if (allError) {
+          console.error('All appointments error:', allError)
+        } else {
+          console.log(`Fetched ${allData?.length} appointments, filtering...`)
+          matchedAppointments = allData?.filter(apt => {
+            const aptNormalized = normalizePhoneNumber(apt.customer_phone)
+            const match = aptNormalized === normalizedPhone
+            if (match) {
+              console.log(`Match found: ${apt.customer_phone} normalized to ${aptNormalized}`)
+            }
+            return match
+          })
+          console.log(`Client-side filter found ${matchedAppointments?.length} matches`)
+        }
+      }
+
+      if (!matchedAppointments || matchedAppointments.length === 0) {
+        setError(`No appointments found for phone number: ${formatPhoneForDisplay(phoneNumber)}. Please check the number or contact us at (216) 481-8696.`)
+        
+        // Show debug info if available
+        if (allAppointments && allAppointments.length > 0) {
+          console.log('Available phone numbers in database:', allAppointments.map(a => a.customer_phone))
+          setDebugInfo(prev => prev + `\n\nSample phone numbers in database: ${allAppointments.map(a => a.customer_phone).join(', ')}`)
+        }
         return
       }
 
-      setAppointments(uniqueAppointments)
+      console.log(`Found ${matchedAppointments.length} matching appointments`)
+      setAppointments(matchedAppointments)
       
       // Load photos for all appointments
-      for (const appointment of uniqueAppointments) {
+      for (const appointment of matchedAppointments) {
         await loadPhotosForAppointment(appointment.id)
       }
 
       setStep('appointments')
-    } catch (err) {
+    } catch (err: any) {
       console.error('Portal login error:', err)
       setError('Unable to retrieve appointments. Please try again or call (216) 481-8696.')
     } finally {
@@ -275,12 +330,19 @@ export default function CustomerPortalPage() {
               </div>
             )}
 
+            {debugInfo && (
+              <div className="p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg text-xs">
+                <strong>Debug Info:</strong>
+                <pre className="mt-2 whitespace-pre-wrap">{debugInfo}</pre>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isLoading}
               className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Loading...' : 'View My Appointments'}
+              {isLoading ? 'Searching...' : 'View My Appointments'}
             </button>
 
             <div className="text-center pt-4 border-t">
@@ -316,6 +378,7 @@ export default function CustomerPortalPage() {
               setAppointments([])
               setAppointmentPhotos({})
               setError('')
+              setDebugInfo('')
             }}
             className="text-primary hover:underline"
           >
@@ -523,4 +586,5 @@ export default function CustomerPortalPage() {
     </div>
   )
 }
+
 
