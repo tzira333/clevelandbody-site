@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import PhoneInput from '@.components/form/PhoneInput.tsx'
+import PhoneInput from '@/components/form/PhoneInput.tsx'
 import EmailInput from '@/components/form/EmailInput.tsx'
 
 export default function SchedulePage() {
