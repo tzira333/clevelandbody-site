@@ -18,12 +18,28 @@ interface Appointment {
   updated_at: string
 }
 
+interface AppointmentPhoto {
+  id: string
+  appointment_id: string
+  photo_url: string
+  photo_path: string
+  caption: string
+  uploaded_by: string
+  created_at: string
+}
+
 export default function CustomerPortalPage() {
   const [step, setStep] = useState<'phone' | 'appointments'>('phone')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [appointmentPhotos, setAppointmentPhotos] = useState<Record<string, AppointmentPhoto[]>>({})
+  const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
   const formatPhoneForDisplay = (phone: string) => {
     const cleaned = phone.replace(/\D/g, '')
@@ -34,16 +50,109 @@ export default function CustomerPortalPage() {
   }
 
   const formatPhoneForSearch = (phone: string) => {
-    // Remove all non-digits
     const digits = phone.replace(/\D/g, '')
-    
-    // Return variations that might be in the database
     return [
-      digits,                           // 2164818696
-      `+1${digits}`,                    // +12164818696
-      `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`, // (216) 481-8696
-      `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`,   // 216-481-8696
+      digits,
+      `+1${digits}`,
+      `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`,
+      `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`,
     ]
+  }
+
+  const loadPhotosForAppointment = async (appointmentId: string) => {
+    try {
+      const supabase = createClient(supabaseUrl, supabaseKey)
+      const { data, error } = await supabase
+        .from('appointment_photos')
+        .select('*')
+        .eq('appointment_id', appointmentId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      setAppointmentPhotos(prev => ({
+        ...prev,
+        [appointmentId]: data || []
+      }))
+    } catch (err) {
+      console.error('Error loading photos:', err)
+    }
+  }
+
+  const handlePhotoUpload = async (appointmentId: string, files: FileList | null) => {
+    if (!files || files.length === 0) return
+
+    setUploadingPhoto(appointmentId)
+    setUploadProgress(0)
+    setError('')
+
+    try {
+      const supabase = createClient(supabaseUrl, supabaseKey)
+      const uploadedPhotos: AppointmentPhoto[] = []
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          throw new Error(`${file.name} is not an image file`)
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          throw new Error(`${file.name} is too large. Max size is 5MB`)
+        }
+
+        // Generate unique filename
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${appointmentId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
+
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('customer-photos')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) throw uploadError
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('customer-photos')
+          .getPublicUrl(fileName)
+
+        // Save photo record to database
+        const { data: photoRecord, error: dbError } = await supabase
+          .from('appointment_photos')
+          .insert({
+            appointment_id: appointmentId,
+            photo_url: urlData.publicUrl,
+            photo_path: fileName,
+            caption: file.name,
+            uploaded_by: 'customer'
+          })
+          .select()
+          .single()
+
+        if (dbError) throw dbError
+
+        uploadedPhotos.push(photoRecord)
+        setUploadProgress(Math.round(((i + 1) / files.length) * 100))
+      }
+
+      // Reload photos for this appointment
+      await loadPhotosForAppointment(appointmentId)
+
+      // Show success message
+      alert(`Successfully uploaded ${uploadedPhotos.length} photo(s)!`)
+    } catch (err: any) {
+      console.error('Photo upload error:', err)
+      setError(err.message || 'Failed to upload photos. Please try again.')
+    } finally {
+      setUploadingPhoto(null)
+      setUploadProgress(0)
+    }
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -52,18 +161,9 @@ export default function CustomerPortalPage() {
     setError('')
 
     try {
-      // Initialize Supabase client
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-      if (!supabaseUrl || !supabaseKey) {
-        throw new Error('Supabase configuration missing')
-      }
-
       const supabase = createClient(supabaseUrl, supabaseKey)
       const phoneVariations = formatPhoneForSearch(phoneNumber)
 
-      // Try to find appointments with any phone variation
       let allAppointments: Appointment[] = []
 
       for (const phoneVar of phoneVariations) {
@@ -78,7 +178,6 @@ export default function CustomerPortalPage() {
         }
       }
 
-      // Remove duplicates by id
       const uniqueAppointments = allAppointments.filter(
         (appointment, index, self) =>
           index === self.findIndex((a) => a.id === appointment.id)
@@ -90,6 +189,12 @@ export default function CustomerPortalPage() {
       }
 
       setAppointments(uniqueAppointments)
+      
+      // Load photos for all appointments
+      for (const appointment of uniqueAppointments) {
+        await loadPhotosForAppointment(appointment.id)
+      }
+
       setStep('appointments')
     } catch (err) {
       console.error('Portal login error:', err)
@@ -142,7 +247,7 @@ export default function CustomerPortalPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Customer Portal</h1>
             <p className="text-gray-700">
-              Enter your phone number to view your repair status and appointment details.
+              Enter your phone number to view your repair status and upload photos.
             </p>
           </div>
 
@@ -209,6 +314,7 @@ export default function CustomerPortalPage() {
               setStep('phone')
               setPhoneNumber('')
               setAppointments([])
+              setAppointmentPhotos({})
               setError('')
             }}
             className="text-primary hover:underline"
@@ -216,6 +322,13 @@ export default function CustomerPortalPage() {
             ← Back to Login
           </button>
         </div>
+
+        {/* Global Error */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
 
         {/* Appointments List */}
         <div className="space-y-6">
@@ -233,7 +346,7 @@ export default function CustomerPortalPage() {
               </div>
 
               {/* Appointment Details */}
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
                 {/* Left Column */}
                 <div className="space-y-4">
                   <div>
@@ -329,6 +442,69 @@ export default function CustomerPortalPage() {
                   )}
                 </div>
               </div>
+
+              {/* Photo Upload Section */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Vehicle Damage Photos
+                </h4>
+
+                {/* Upload Button */}
+                <div className="mb-4">
+                  <label
+                    className={`btn-primary inline-flex items-center cursor-pointer ${
+                      uploadingPhoto === appointment.id ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    {uploadingPhoto === appointment.id ? `Uploading ${uploadProgress}%...` : 'Upload Photos'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      disabled={uploadingPhoto === appointment.id}
+                      onChange={(e) => handlePhotoUpload(appointment.id, e.target.files)}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Max 5MB per photo. Accepted formats: JPG, PNG, HEIC
+                  </p>
+                </div>
+
+                {/* Photos Gallery */}
+                {appointmentPhotos[appointment.id] && appointmentPhotos[appointment.id].length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {appointmentPhotos[appointment.id].map((photo) => (
+                      <div key={photo.id} className="relative group">
+                        <img
+                          src={photo.photo_url}
+                          alt={photo.caption}
+                          className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 group-hover:border-primary transition-colors cursor-pointer"
+                          onClick={() => window.open(photo.photo_url, '_blank')}
+                        />
+                        <p className="text-xs text-gray-600 mt-1 truncate">{photo.caption}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(photo.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-gray-600">No photos uploaded yet</p>
+                    <p className="text-sm text-gray-500 mt-1">Upload photos of your vehicle damage to help us prepare an accurate estimate</p>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -347,3 +523,4 @@ export default function CustomerPortalPage() {
     </div>
   )
 }
+
