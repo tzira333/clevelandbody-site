@@ -13,7 +13,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold hover:opacity-90 transition-opacity">
             <div className="flex flex-col">
-              <span className="text-sm font-normal">DOMESTIC & FOREIGN</span>
+              <span className="text-xl font-semibold">DOMESTIC & FOREIGN</span>
               <span>AUTO BODY INC.</span>
             </div>
           </Link>
