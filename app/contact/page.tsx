@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import PhoneInput from '@/components/form/PhoneInput'
-import EmailInput from '@/components/form/EmailInput'
+import PhoneInput from 'components/form/PhoneInput'
+import EmailInput from 'components/form/EmailInput'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({

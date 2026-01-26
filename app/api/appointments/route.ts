@@ -20,6 +20,19 @@ function normalizePhoneNumber(phone: string): string {
   
   return phone
 }
+
+function normalizeEmail(email: string): string {
+  return email.toLowerCase().trim()
+}
+
+// In POST handler, use:
+const normalizedPhone = normalizePhoneNumber(phone)
+const normalizedEmail = email ? normalizeEmail(email) : null
+
+
+
+
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
