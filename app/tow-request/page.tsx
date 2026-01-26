@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import PhoneInput from '@/components/form/PhoneInput.tsx'
-import EmailInput from '@/components/form/EmailInput.tsx'
+import PhoneInput from '@/components/form/PhoneInput'
+import EmailInput from '@/components/form/EmailInput'
 
 export default function TowRequestPage() {
   const router = useRouter()
