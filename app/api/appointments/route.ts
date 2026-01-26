@@ -134,7 +134,7 @@ const supabase = createClient(
             (async () => {
               try {
                 await resend.emails.send({
-                  from: 'Domestic & Foreign Auto Body <appointments@clevelandbody.com>',
+                  from: 'Domestic & Foreign Auto Body <onboarding@resend.dev>',
                   to: emailAddress.trim(),
                   subject: `New Appointment Request - ${name}`,
                   text: appointmentDetails,
