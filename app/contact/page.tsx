@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import PhoneInput from '@/components/form/PhoneInput'
-import EmailInput from '@/components/form/EmailInput'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -178,7 +176,7 @@ export default function ContactPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" autoComplete="on">
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
                   {error}
@@ -191,6 +189,8 @@ export default function ContactPage() {
                 </label>
                 <input
                   type="text"
+                  name="name"
+                  autoComplete="name"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -199,27 +199,59 @@ export default function ContactPage() {
                 />
               </div>
 
-              <PhoneInput
-                label="Phone Number *"
-                value={formData.phone}
-                onChange={(value) => setFormData({ ...formData, phone: value })}
-                required
-                placeholder="216-555-1234"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  autoComplete="tel"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => {
+                    const input = e.target.value
+                    const digits = input.replace(/\D/g, '')
+                    const limited = digits.slice(0, 10)
+                    let formatted = ''
+                    if (limited.length <= 3) {
+                      formatted = limited
+                    } else if (limited.length <= 6) {
+                      formatted = `${limited.slice(0, 3)}-${limited.slice(3)}`
+                    } else {
+                      formatted = `${limited.slice(0, 3)}-${limited.slice(3, 6)}-${limited.slice(6)}`
+                    }
+                    setFormData({ ...formData, phone: formatted })
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                  placeholder="216-555-1234"
+                  maxLength={12}
+                />
+                <p className="text-xs text-gray-500 mt-1">Format: xxx-xxx-xxxx</p>
+              </div>
 
-              <EmailInput
-                label="Email Address *"
-                value={formData.email}
-                onChange={(value) => setFormData({ ...formData, email: value })}
-                required
-                placeholder="your.email@example.com"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase().trim() })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon focus:border-transparent"
+                  placeholder="your.email@example.com"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Subject *
                 </label>
                 <select
+                  name="subject"
                   required
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
@@ -239,6 +271,7 @@ export default function ContactPage() {
                   Message *
                 </label>
                 <textarea
+                  name="message"
                   required
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -248,13 +281,25 @@ export default function ContactPage() {
                 />
               </div>
 
-              {/* SUBMIT BUTTON - FIXED */}
+              {/* SUBMIT BUTTON - FIXED WITH EXPLICIT COLORS */}
               <div className="pt-4">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-maroon text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-red-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                  style={{ display: 'block', visibility: 'visible' }}
+                  className="w-full py-4 px-6 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  style={{
+                    backgroundColor: '#800000',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    display: 'block',
+                    visibility: 'visible'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!loading) e.currentTarget.style.backgroundColor = '#660000'
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!loading) e.currentTarget.style.backgroundColor = '#800000'
+                  }}
                 >
                   {loading ? 'Sending...' : 'Send Message'}
                 </button>
@@ -266,3 +311,4 @@ export default function ContactPage() {
     </div>
   )
 }
+
