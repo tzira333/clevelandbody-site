@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import ScheduleForm from './ScheduleForm'
-import ScheduleForm from './ScheduleForm'
+
 
 export const metadata = {
   title: 'Schedule Estimate | Domestic & Foreign Auto Body',
