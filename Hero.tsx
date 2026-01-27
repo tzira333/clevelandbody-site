@@ -16,7 +16,7 @@ export default function Hero() {
               href="/schedule" 
               className="btn-primary bg-white text-primary hover:bg-secondary-cream text-center text-lg"
             >
-              Schedule Free Estimate
+              Schedule An Estimate
             </Link>
             <Link 
               href="/tow-request" 
