@@ -6,10 +6,10 @@ export default function Hero() {
 <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-4xl">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            Expert Auto Body & Collision Repair in Cleveland
+            Expert Auto Body, Custom Painting, Restoration & Collision Repair in Cleveland
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-secondary-cream">
-            Over 40 years of experience serving domestic and foreign vehicles. Professional collision repair, custom painting, and restoration services.
+            We repair all makes and models of Domestic and Foreign vehicles including all EVs and Hybrid vehicles. Professional collision repair, custom painting, and restoration services.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
