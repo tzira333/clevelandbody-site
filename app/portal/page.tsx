@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { normalizePhone, formatPhoneDisplay } from '@/lib/utils/phone'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -46,24 +47,8 @@ export default function CustomerPortalPage() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-  const normalizePhoneNumber = (phone: string): string => {
-    const digits = phone.replace(/\D/g, '')
-    if (digits.length === 10) {
-      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
-    }
-    return phone
-  }
-
   const normalizeEmail = (email: string): string => {
     return email.toLowerCase().trim()
-  }
-
-  const formatPhoneDisplay = (phone: string) => {
-    const digits = phone.replace(/\D/g, '')
-    if (digits.length === 10) {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
-    }
-    return phone
   }
 
   const loadPhotosForAppointment = async (appointmentId: string) => {
@@ -163,13 +148,14 @@ export default function CustomerPortalPage() {
       let matchedAppointments: Appointment[] = []
 
       if (loginMethod === 'phone') {
-        const normalizedPhone = normalizePhoneNumber(phoneNumber)
-        console.log('Searching by phone:', normalizedPhone)
+        // CRITICAL FIX: Use normalizePhone utility for consistent lookup
+        const normalized = normalizePhone(phoneNumber)
+        console.log('Searching by normalized phone:', normalized)
 
         const { data, error } = await supabase
           .from('appointments')
           .select('*')
-          .eq('customer_phone', normalizedPhone)
+          .eq('customer_phone', normalized) // Match digits only
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -281,19 +267,15 @@ export default function CustomerPortalPage() {
                   type="tel"
                   value={phoneNumber}
                   onChange={(e) => {
-                    const digits = e.target.value.replace(/\D/g, '').slice(0, 10)
-                    const formatted = digits.length === 0 ? '' :
-                      digits.length <= 3 ? digits :
-                      digits.length <= 6 ? `${digits.slice(0, 3)}-${digits.slice(3)}` :
-                      `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
-                    setPhoneNumber(formatted)
+                    // Allow any input format - we normalize on submit
+                    setPhoneNumber(e.target.value)
                   }}
-                  placeholder="216-555-1234"
+                  placeholder="216-555-1234 or 2165551234"
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
                 />
                 <p className="text-sm text-gray-600 mt-1">
-                  Enter the phone number you used when scheduling
+                  Enter the phone number you used when scheduling (any format works)
                 </p>
               </div>
             )}
@@ -307,7 +289,7 @@ export default function CustomerPortalPage() {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
@@ -344,7 +326,7 @@ export default function CustomerPortalPage() {
     )
   }
 
-  // Appointments view (same as before but simplified for space)
+  // Appointments view
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-4xl mx-auto">
@@ -364,7 +346,7 @@ export default function CustomerPortalPage() {
               setAppointmentPhotos({})
               setError('')
             }}
-            className="text-primary hover:underline"
+            className="text-primary hover:underline font-semibold"
           >
             ← Back to Login
           </button>
@@ -398,10 +380,20 @@ export default function CustomerPortalPage() {
                     </p>
                     <p className="text-gray-700"><span className="font-semibold">Time:</span> {appointment.appointment_time}</p>
                   </div>
+                  <div>
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Contact:</span> {formatPhoneDisplay(appointment.customer_phone)}
+                    </p>
+                    {appointment.customer_email && (
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Email:</span> {appointment.customer_email}
+                      </p>
+                    )}
+                  </div>
                   {appointment.message && (
                     <div>
                       <p className="font-semibold text-gray-900 mb-1">Notes:</p>
-                      <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded">{appointment.message}</p>
+                      <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded whitespace-pre-wrap">{appointment.message}</p>
                     </div>
                   )}
                 </div>
@@ -409,9 +401,13 @@ export default function CustomerPortalPage() {
                 <div className="space-y-4">
                   <div className="bg-primary-light/10 p-4 rounded-lg">
                     <h4 className="font-semibold text-gray-900 mb-3">Contact Us</h4>
-                    <a href="tel:+12164818696" className="flex items-center text-primary hover:underline">
+                    <a href="tel:+12164818696" className="flex items-center text-primary hover:underline mb-2">
                       📞 (216) 481-8696
                     </a>
+                    <p className="text-sm text-gray-600">
+                      Mon-Fri: 8:00 AM - 4:30 PM<br />
+                      Sat: 9:00 AM - 1:00 PM
+                    </p>
                   </div>
                 </div>
               </div>
@@ -430,7 +426,7 @@ export default function CustomerPortalPage() {
                       className="hidden"
                     />
                   </label>
-                  <p className="text-sm text-gray-600 mt-2">Max 5MB per photo</p>
+                  <p className="text-sm text-gray-600 mt-2">Max 5MB per photo. JPG, PNG, or HEIC format.</p>
                 </div>
 
                 {appointmentPhotos[appointment.id]?.length > 0 ? (
@@ -440,16 +436,19 @@ export default function CustomerPortalPage() {
                         <img
                           src={photo.photo_url}
                           alt={photo.caption}
-                          className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 group-hover:border-primary cursor-pointer"
+                          className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 group-hover:border-primary cursor-pointer transition-all"
                           onClick={() => window.open(photo.photo_url, '_blank')}
                         />
                         <p className="text-xs text-gray-600 mt-1 truncate">{photo.caption}</p>
+                        <span className="text-xs text-gray-500">
+                          {new Date(photo.created_at).toLocaleDateString()}
+                        </span>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <p className="text-gray-600">No photos uploaded yet</p>
+                    <p className="text-gray-600">No photos uploaded yet. Click "Upload Photos" to add images of vehicle damage.</p>
                   </div>
                 )}
               </div>
