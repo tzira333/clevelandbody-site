@@ -7,7 +7,6 @@ import Image from 'next/image'
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Use environment variables for business info
   const businessPhone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+12164818696'
   const phoneDisplay = businessPhone.replace(/^\+1/, '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3')
 
@@ -18,13 +17,12 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
             <Image
-              src="https://www.genspark.ai/api/files/s/JA8Y2iRU"
+              src="/logo.jpg"
               alt="Domestic and Foreign Auto Body Inc."
-              width={160}
-              height={160}
+              width={200}
+              height={200}
               priority
-              className="h-16 w-auto md:h-20"
-              unoptimized
+              className="h-16 w-auto md:h-20 object-contain"
             />
           </Link>
 
@@ -167,3 +165,4 @@ export default function Header() {
     </header>
   )
 }
+
