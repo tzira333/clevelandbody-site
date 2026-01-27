@@ -1,5 +1,3 @@
-
-
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
@@ -11,10 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        maroon: '#800000',
+        maroon: {
+          DEFAULT: '#800000',
+          dark: '#660000',
+          light: '#a00000',
+        },
       },
     },
   },
   plugins: [],
+  important: true, // THIS LINE IS CRITICAL - Force all Tailwind classes to use !important
 }
+
 export default config
+
