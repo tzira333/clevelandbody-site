@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { formatPhoneInput } from '@/lib/utils/phone'
+import { formatPhoneInput } from '../../lib/utils/phone'
 
 export default function ScheduleForm() {
   const router = useRouter()

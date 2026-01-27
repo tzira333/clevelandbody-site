@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { formatPhoneInput } from '@/lib/utils/phone'
+import { formatPhoneInput } from '../../lib/utils/phone'
 
 export default function ContactForm() {
   const businessPhone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+12164818696'

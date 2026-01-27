@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { normalizePhone, formatPhoneDisplay } from '@/lib/utils/phone'
+import { normalizePhone, formatPhoneDisplay } from '../../lib/utils/phone'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
