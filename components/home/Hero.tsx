@@ -3,20 +3,20 @@ import Link from 'next/link'
 export default function Hero() {
   return (
     <section className="relative bg-gradient-to-br from-primary via-primary-light to-primary-dark text-white">
-      <div className="container mx-auto px-4 py-24 md:py-32">
+<div className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-4xl">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            Expert Auto Body & Collision Repair in Cleveland
+            Expert Auto Body, Custom Painting, Restoration & Collision Repair in Cleveland
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-secondary-cream">
-            Over 40 years of experience serving domestic and foreign vehicles. Professional collision repair, custom painting, and restoration services.
+            We repair all makes and models of Domestic and Foreign vehicles including all EVs and Hybrid vehicles. Professional collision repair, custom painting, and restoration services.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
               href="/schedule" 
               className="btn-primary bg-white text-primary hover:bg-secondary-cream text-center text-lg"
             >
-              Schedule Free Estimate
+              Schedule An Estimate
             </Link>
             <Link 
               href="/tow-request" 
@@ -57,7 +57,7 @@ export default function Hero() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p className="font-bold">40+ years Experience</p>
+                <p className="font-bold">40+ Years Experience</p>
                 <p className="text-sm text-secondary-cream">Expert technicians</p>
               </div>
             </div>

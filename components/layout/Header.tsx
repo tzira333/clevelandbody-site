@@ -5,69 +5,99 @@ import Link from 'next/link'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [logoError, setLogoError] = useState(false)
-
+  
+  // Get phone from env or use default
   const businessPhone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+12164818696'
-  const phoneDisplay = businessPhone.replace(/^\+1/, '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3')
+  
+  // Format phone for display (XXX) XXX-XXXX
+  const formatPhoneDisplay = (phone: string) => {
+    const cleaned = phone.replace(/\D/g, '')
+    const match = cleaned.match(/^1?(\d{3})(\d{3})(\d{4})$/)
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`
+    }
+    return phone
+  }
 
   return (
-    <header className="bg-primary text-white shadow-lg sticky top-0 z-50">
-      <nav className="container mx-auto px-4 py-3">
-        <div className="flex justify-between items-center gap-4">
+    <header className="bg-primary shadow-lg sticky top-0 z-50">
+      {/* Top Contact Bar */}
+      <div className="bg-primary-dark text-white py-2">
+        <div className="container mx-auto px-4 flex justify-between items-center text-sm">
+          <a 
+            href={`tel:${businessPhone}`}
+            className="hover:text-secondary-cream transition-colors"
+          >
+            📞 {formatPhoneDisplay(businessPhone)}
+          </a>
+          <span className="hidden md:inline">
+            Mon-Fri 8:00 AM - 4:30 PM | Sat 9:00 AM - 1:00 PM
+          </span>
+        </div>
+      </div>
+
+      {/* Main Navigation */}
+      <nav className="container mx-auto px-4">
+        <div className="flex items-center justify-between py-3">
+          
           {/* Logo - Takes up 1/3 of header width */}
-          <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity w-1/3">
-            {!logoError ? (
-              <img
-                src="https://www.genspark.ai/api/files/s/JA8Y2iRU"
-                alt="Domestic and Foreign Auto Body Inc."
-                className="h-20 w-auto md:h-24 lg:h-28"
-                onError={() => setLogoError(true)}
-                loading="eager"
-              />
-            ) : (
-              <div className="h-20 md:h-24 lg:h-28 flex items-center">
-                <span className="text-xl md:text-2xl lg:text-3xl font-bold text-white leading-tight">
-                  DOMESTIC & FOREIGN<br/>AUTO BODY INC.
-                </span>
-              </div>
-            )}
+          <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity" style={{ width: '33.33%' }}>
+            <img
+              src="https://www.genspark.ai/api/files/s/JA8Y2iRU"
+              alt="Domestic and Foreign Auto Body Inc."
+              className="h-20 md:h-24 lg:h-28 w-auto"
+              onError={(e) => {
+                // Fallback to text if image fails to load
+                e.currentTarget.style.display = 'none'
+                const fallback = document.createElement('div')
+                fallback.className = 'text-white font-bold'
+                fallback.innerHTML = '<div class="text-lg md:text-xl lg:text-2xl">DOMESTIC & FOREIGN</div><div class="text-xs md:text-sm">AUTO BODY INC.</div>'
+                e.currentTarget.parentElement?.appendChild(fallback)
+              }}
+            />
           </Link>
 
-          {/* Desktop Navigation - Left aligned, takes up remaining 2/3 */}
-          <div className="hidden lg:flex items-center justify-start space-x-3 xl:space-x-4 flex-grow">
-            <Link href="/" className="hover:text-secondary-cream transition-colors font-medium text-sm">
+          {/* Desktop Navigation - Left-aligned in remaining space */}
+          <div className="hidden lg:flex items-center justify-start flex-grow gap-3 ml-6">
+            <Link href="/" className="text-sm text-white hover:text-secondary-cream transition-colors whitespace-nowrap">
               Home
             </Link>
-            <Link href="/services" className="hover:text-secondary-cream transition-colors font-medium text-sm">
+            <span className="text-white/30">|</span>
+            <Link href="/services" className="text-sm text-white hover:text-secondary-cream transition-colors whitespace-nowrap">
               Services
             </Link>
-            <Link href="/insurance" className="hover:text-secondary-cream transition-colors font-medium text-sm">
+            <span className="text-white/30">|</span>
+            <Link href="/insurance" className="text-sm text-white hover:text-secondary-cream transition-colors whitespace-nowrap">
               Insurance
             </Link>
-            <Link href="/gallery" className="hover:text-secondary-cream transition-colors font-medium text-sm">
+            <span className="text-white/30">|</span>
+            <Link href="/gallery" className="text-sm text-white hover:text-secondary-cream transition-colors whitespace-nowrap">
               Gallery
             </Link>
-            <Link href="/reviews" className="hover:text-secondary-cream transition-colors font-medium text-sm">
+            <span className="text-white/30">|</span>
+            <Link href="/reviews" className="text-sm text-white hover:text-secondary-cream transition-colors whitespace-nowrap">
               Reviews
             </Link>
-            <Link href="/contact" className="hover:text-secondary-cream transition-colors font-medium text-sm">
+            <span className="text-white/30">|</span>
+            <Link href="/contact" className="text-sm text-white hover:text-secondary-cream transition-colors whitespace-nowrap">
               Contact
             </Link>
+            <span className="text-white/30">|</span>
             <Link 
               href="/portal" 
-              className="border-2 border-white px-3 py-1.5 rounded-lg font-semibold text-sm hover:bg-white hover:text-primary transition-all duration-200 whitespace-nowrap"
+              className="text-xs px-3 py-1.5 border border-white text-white hover:bg-white hover:text-primary transition-colors rounded whitespace-nowrap"
             >
               Portal
             </Link>
             <Link 
               href="/schedule" 
-              className="bg-white text-primary px-4 py-1.5 rounded-lg font-bold text-sm hover:bg-secondary-cream transition-all duration-200 shadow-lg whitespace-nowrap"
+              className="text-xs px-3 py-1.5 bg-white text-primary hover:bg-secondary-cream transition-colors rounded font-semibold whitespace-nowrap"
             >
               Schedule
             </Link>
             <Link 
               href="/admin" 
-              className="border-2 border-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-white hover:text-primary transition-all duration-200 whitespace-nowrap"
+              className="text-xs px-3 py-1.5 border-2 border-white text-white hover:bg-white hover:text-primary transition-colors rounded font-semibold whitespace-nowrap"
             >
               Staff Login
             </Link>
@@ -75,10 +105,9 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 hover:bg-primary-light rounded-lg transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden text-white p-2"
             aria-label="Toggle menu"
-            aria-expanded={mobileMenuOpen}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileMenuOpen ? (
@@ -92,66 +121,68 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 space-y-3 border-t border-primary-light pt-4">
+          <div className="lg:hidden pb-4 space-y-2">
             <Link 
               href="/" 
-              className="block py-2 hover:text-secondary-cream transition-colors font-medium" 
+              className="block py-2 text-white hover:text-secondary-cream transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Home
             </Link>
             <Link 
               href="/services" 
-              className="block py-2 hover:text-secondary-cream transition-colors font-medium" 
+              className="block py-2 text-white hover:text-secondary-cream transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Services
             </Link>
             <Link 
               href="/insurance" 
-              className="block py-2 hover:text-secondary-cream transition-colors font-medium" 
+              className="block py-2 text-white hover:text-secondary-cream transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Insurance
+              Insurance & Claims
             </Link>
             <Link 
               href="/gallery" 
-              className="block py-2 hover:text-secondary-cream transition-colors font-medium" 
+              className="block py-2 text-white hover:text-secondary-cream transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Gallery
+              Photo Gallery
             </Link>
             <Link 
               href="/reviews" 
-              className="block py-2 hover:text-secondary-cream transition-colors font-medium" 
+              className="block py-2 text-white hover:text-secondary-cream transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Reviews
             </Link>
             <Link 
               href="/contact" 
-              className="block py-2 hover:text-secondary-cream transition-colors font-medium" 
+              className="block py-2 text-white hover:text-secondary-cream transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Contact
             </Link>
             <Link 
               href="/portal" 
-              className="block border-2 border-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-all duration-200 text-center mt-4"
+              className="block py-2 text-white hover:text-secondary-cream transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Customer Portal
             </Link>
             <Link 
               href="/schedule" 
-              className="block bg-white text-primary px-6 py-3 rounded-lg font-bold hover:bg-secondary-cream transition-all duration-200 text-center shadow-lg"
+              className="block py-3 bg-white text-primary text-center font-semibold rounded hover:bg-secondary-cream transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Schedule Appointment
             </Link>
+            
+            {/* Staff Login - Highlighted at bottom */}
             <Link 
               href="/admin" 
-              className="block border-2 border-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-all duration-200 text-center"
+              className="block py-3 border-2 border-white text-white text-center font-semibold rounded hover:bg-white hover:text-primary transition-colors mt-4"
               onClick={() => setMobileMenuOpen(false)}
             >
               Staff Login
@@ -159,29 +190,7 @@ export default function Header() {
           </div>
         )}
       </nav>
-
-      {/* Contact Info Bar */}
-      <div className="bg-primary-dark">
-        <div className="container mx-auto px-4 py-2 flex flex-col sm:flex-row justify-between items-center text-sm">
-          <div className="flex items-center space-x-4 mb-2 sm:mb-0">
-            <a 
-              href={`tel:${businessPhone}`}
-              className="hover:text-secondary-cream transition-colors flex items-center font-semibold"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              {phoneDisplay}
-            </a>
-          </div>
-          <div className="flex items-center text-xs sm:text-sm">
-            <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Mon-Fri: 8:00 AM - 4:30 PM | Sat: 9:00 AM - 1:00 PM</span>
-          </div>
-        </div>
-      </div>
     </header>
   )
 }
+
