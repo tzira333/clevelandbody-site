@@ -23,9 +23,9 @@ export default function Header() {
 
   return (
     <header className="bg-primary shadow-lg sticky top-0 z-50">
-      {/* Top Contact Bar */}
-      <div className="bg-primary-dark text-white py-2">
-        <div className="container mx-auto px-4 flex justify-between items-center text-sm">
+      {/* Top Contact Bar - Reduced height */}
+      <div className="bg-primary-dark text-white py-1">
+        <div className="container mx-auto px-4 flex justify-between items-center text-xs">
           <a 
             href={`tel:${businessPhone}`}
             className="hover:text-secondary-cream transition-colors"
@@ -38,75 +38,46 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main Navigation */}
+      {/* Main Navigation - Reduced padding */}
       <nav className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-2">
           
-          {/* Logo Section - Takes up 1/3 of header width */}
+          {/* Logo Section - Takes up 1/3 of header width, removed cars, added "Shop" */}
           <Link 
             href="/" 
             className="flex-shrink-0 hover:opacity-90 transition-opacity"
             style={{ width: '33.33%', minWidth: '280px' }}
           >
-            <div className="bg-primary rounded-lg p-4 border-2 border-secondary-cream">
+            <div className="bg-primary rounded-lg p-2 border-2 border-secondary-cream">
               {/* Top Text: DOMESTIC & FOREIGN */}
-              <div className="text-center mb-2">
-                <h1 className="text-secondary-cream font-bold text-xl md:text-2xl lg:text-3xl tracking-wide">
+              <div className="text-center mb-1">
+                <h1 className="text-secondary-cream font-bold text-lg md:text-xl lg:text-2xl tracking-wide">
                   DOMESTIC & FOREIGN
                 </h1>
               </div>
 
-              {/* Car Images Row */}
-              <div className="flex justify-center items-center gap-4 mb-2">
-                {/* Classic American Muscle Car */}
-                <div className="w-20 h-12 md:w-24 md:h-14 lg:w-28 lg:h-16 relative">
-                  <svg viewBox="0 0 100 50" className="w-full h-full fill-secondary-cream">
-                    {/* Classic muscle car silhouette */}
-                    <path d="M10,35 L15,30 L20,28 L30,28 L35,25 L45,25 L50,28 L70,28 L75,30 L80,32 L85,35 L90,35 L90,42 L85,42 L83,45 L75,45 L73,42 L30,42 L28,45 L20,45 L18,42 L10,42 Z"/>
-                    {/* Wheels */}
-                    <circle cx="25" cy="42" r="5"/>
-                    <circle cx="75" cy="42" r="5"/>
-                    {/* Windows */}
-                    <path d="M35,28 L38,25 L42,25 L45,28 Z" fill="#800000"/>
-                  </svg>
-                </div>
-
-                {/* European Convertible */}
-                <div className="w-20 h-12 md:w-24 md:h-14 lg:w-28 lg:h-16 relative">
-                  <svg viewBox="0 0 100 50" className="w-full h-full fill-secondary-cream">
-                    {/* Convertible silhouette */}
-                    <path d="M15,38 L20,33 L25,30 L35,30 L40,28 L50,28 L55,30 L75,30 L82,35 L88,38 L88,43 L82,43 L80,46 L72,46 L70,43 L32,43 L30,46 L22,46 L20,43 L15,43 Z"/>
-                    {/* Wheels */}
-                    <circle cx="28" cy="43" r="5"/>
-                    <circle cx="75" cy="43" r="5"/>
-                    {/* Windshield */}
-                    <path d="M40,30 L42,28 L48,28 L50,30 Z" fill="#800000"/>
-                  </svg>
-                </div>
-              </div>
-
-              {/* AUTOBODY Text */}
-              <div className="bg-secondary-cream text-primary text-center py-1 mb-2 rounded">
-                <span className="font-bold text-lg md:text-xl lg:text-2xl tracking-widest">
-                  AUTOBODY
+              {/* AUTOBODY SHOP Text - Added "Shop" */}
+              <div className="bg-secondary-cream text-primary text-center py-1 mb-1 rounded">
+                <span className="font-bold text-base md:text-lg lg:text-xl tracking-widest">
+                  AUTOBODY SHOP
                 </span>
               </div>
 
               {/* Slogan */}
-              <div className="text-center mb-2">
-                <p className="text-secondary-cream italic text-xs md:text-sm font-serif">
+              <div className="text-center mb-1">
+                <p className="text-secondary-cream italic text-xs font-serif">
                   {slogan}
                 </p>
               </div>
 
               {/* Address and Phone */}
-              <div className="text-center space-y-1">
-                <p className="text-secondary-cream font-semibold text-xs md:text-sm">
+              <div className="text-center space-y-0.5">
+                <p className="text-secondary-cream font-semibold text-xs">
                   {businessAddress}
                 </p>
                 <a 
                   href={`tel:${businessPhone}`}
-                  className="block text-secondary-cream font-bold text-sm md:text-base hover:text-white transition-colors"
+                  className="block text-secondary-cream font-bold text-sm hover:text-white transition-colors"
                 >
                   {formatPhoneDisplay(businessPhone)}
                 </a>
@@ -250,5 +221,6 @@ export default function Header() {
     </header>
   )
 }
+
 
 
