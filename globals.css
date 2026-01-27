@@ -2,57 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
 
-  html {
-    -webkit-text-size-adjust: 100%;
-    tab-size: 4;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
   }
+}
 
-  body {
-    margin: 0;
-    line-height: inherit;
-  }
-
-  /* CRITICAL FIX: Remove any opacity/filter being applied */
-  html,
-  body,
-  #__next,
-  main {
-    opacity: 1 !important;
-    filter: none !important;
-    -webkit-filter: none !important;
-  }
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
 }
 
 @layer utilities {
-  /* Force proper maroon color */
-  .bg-maroon {
-    background-color: #800000 !important;
+  .text-balance {
+    text-wrap: balance;
   }
-  
-  .text-maroon {
-    color: #800000 !important;
-  }
-  
-  /* Ensure focus ring uses maroon */
-  .focus\:ring-maroon:focus {
-    --tw-ring-color: #800000 !important;
-  }
-}
-
-/* Emergency override for any element with opacity/filter */
-* {
-  opacity: inherit !important;
-}
-
-body * {
-  filter: none !important;
-  -webkit-filter: none !important;
 }
