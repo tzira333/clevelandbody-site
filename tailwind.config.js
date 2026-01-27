@@ -1,3 +1,5 @@
+
+
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
@@ -9,10 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        maroon: {
-          DEFAULT: '#800000',
-          dark: '#660000',
-        },
+        maroon: '#800000',
       },
     },
   },
