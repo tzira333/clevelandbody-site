@@ -1,39 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    @apply bg-white text-gray-900 antialiased;
-  }
+/* Submit Button Fix */
+.submit-button-fix {
+  width: 100% !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 1.125rem !important;
+  background-color: #800000 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  transition: background-color 0.2s !important;
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-primary hover:bg-primary-light text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
-  }
-  
-  .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
-  }
-  
-  .btn-outline {
-    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
-  }
-  
-  .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all;
-  }
-  
-  .card {
-    @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200;
-  }
-  
-  .section-heading {
-    @apply text-3xl md:text-4xl font-bold text-gray-900 mb-4;
-  }
-  
-  .section-subheading {
-    @apply text-lg md:text-xl text-gray-600 mb-8;
-  }
+.submit-button-fix:hover:not(:disabled) {
+  background-color: #660000 !important;
+}
+
+.submit-button-fix:disabled {
+  background-color: #999999 !important;
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
 }
