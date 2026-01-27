@@ -1,28 +1,21 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
   content: [
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    // Removed the catch-all pattern that was scanning node_modules
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
       colors: {
-        primary: {
+        maroon: {
           DEFAULT: '#800000',
-          light: '#A00000',
-          dark: '#600000',
+          dark: '#660000',
         },
-        secondary: {
-          DEFAULT: '#FFFFFF',
-          cream: '#F5F5F5',
-        },
-      },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },
   plugins: [],
 }
+export default config
