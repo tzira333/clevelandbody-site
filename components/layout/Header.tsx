@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -14,15 +13,13 @@ export default function Header() {
     <header className="bg-primary text-white shadow-lg sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Logo */}
+          {/* Logo - Using standard img tag */}
           <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
-            <Image
+            <img
               src="/logo.jpg"
               alt="Domestic and Foreign Auto Body Inc."
-              width={200}
-              height={200}
-              priority
-              className="h-16 w-auto md:h-20 object-contain"
+              className="h-16 w-auto md:h-20"
+              loading="eager"
             />
           </Link>
 
