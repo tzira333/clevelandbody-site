@@ -13,63 +13,63 @@ export default function Header() {
   return (
     <header className="bg-primary text-white shadow-lg sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-3">
-        <div className="flex justify-between items-center">
-          {/* Logo with fallback */}
-          <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
+        <div className="flex justify-between items-center gap-4">
+          {/* Logo - Takes up 1/3 of header width */}
+          <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity w-1/3">
             {!logoError ? (
               <img
                 src="https://www.genspark.ai/api/files/s/JA8Y2iRU"
                 alt="Domestic and Foreign Auto Body Inc."
-                className="h-16 w-auto md:h-20"
+                className="h-20 w-auto md:h-24 lg:h-28"
                 onError={() => setLogoError(true)}
                 loading="eager"
               />
             ) : (
-              <div className="h-16 md:h-20 flex items-center">
-                <span className="text-lg md:text-xl font-bold text-white">
+              <div className="h-20 md:h-24 lg:h-28 flex items-center">
+                <span className="text-xl md:text-2xl lg:text-3xl font-bold text-white leading-tight">
                   DOMESTIC & FOREIGN<br/>AUTO BODY INC.
                 </span>
               </div>
             )}
           </Link>
 
-          {/* Desktop Navigation - More Compact */}
-          <div className="hidden lg:flex items-center space-x-2 xl:space-x-4">
-            <Link href="/" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
+          {/* Desktop Navigation - Left aligned, takes up remaining 2/3 */}
+          <div className="hidden lg:flex items-center justify-start space-x-3 xl:space-x-4 flex-grow">
+            <Link href="/" className="hover:text-secondary-cream transition-colors font-medium text-sm">
               Home
             </Link>
-            <Link href="/services" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
+            <Link href="/services" className="hover:text-secondary-cream transition-colors font-medium text-sm">
               Services
             </Link>
-            <Link href="/insurance" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
+            <Link href="/insurance" className="hover:text-secondary-cream transition-colors font-medium text-sm">
               Insurance
             </Link>
-            <Link href="/gallery" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
+            <Link href="/gallery" className="hover:text-secondary-cream transition-colors font-medium text-sm">
               Gallery
             </Link>
-            <Link href="/reviews" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
+            <Link href="/reviews" className="hover:text-secondary-cream transition-colors font-medium text-sm">
               Reviews
             </Link>
-            <Link href="/contact" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
+            <Link href="/contact" className="hover:text-secondary-cream transition-colors font-medium text-sm">
               Contact
             </Link>
             <Link 
               href="/portal" 
-              className="border-2 border-white px-2 py-1 rounded-lg font-semibold text-xs hover:bg-white hover:text-primary transition-all duration-200 whitespace-nowrap"
+              className="border-2 border-white px-3 py-1.5 rounded-lg font-semibold text-sm hover:bg-white hover:text-primary transition-all duration-200 whitespace-nowrap"
             >
               Portal
             </Link>
             <Link 
               href="/schedule" 
-              className="bg-white text-primary px-3 py-1 rounded-lg font-bold text-xs hover:bg-secondary-cream transition-all duration-200 shadow-lg whitespace-nowrap"
+              className="bg-white text-primary px-4 py-1.5 rounded-lg font-bold text-sm hover:bg-secondary-cream transition-all duration-200 shadow-lg whitespace-nowrap"
             >
               Schedule
             </Link>
             <Link 
               href="/admin" 
-              className="text-xs text-white/80 hover:text-white transition-colors whitespace-nowrap ml-2"
+              className="border-2 border-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-white hover:text-primary transition-all duration-200 whitespace-nowrap"
             >
-              Staff
+              Staff Login
             </Link>
           </div>
 
@@ -151,7 +151,7 @@ export default function Header() {
             </Link>
             <Link 
               href="/admin" 
-              className="block text-center py-2 text-sm text-white/80 hover:text-white transition-colors border-t border-primary-light pt-4 mt-4"
+              className="block border-2 border-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-all duration-200 text-center"
               onClick={() => setMobileMenuOpen(false)}
             >
               Staff Login
