@@ -250,12 +250,22 @@ export default function TowRequestPage() {
                 />
               </div>
 
-              {/* SUBMIT BUTTON - USING CUSTOM CSS CLASS */}
               <div className="pt-4">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="submit-button-fix"
+                  style={{
+                    width: '100%',
+                    padding: '1rem 1.5rem',
+                    borderRadius: '0.5rem',
+                    fontWeight: 600,
+                    fontSize: '1.125rem',
+                    backgroundColor: '#800000',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.5 : 1
+                  }}
                 >
                   {loading ? 'Submitting...' : 'Request Tow Service'}
                 </button>

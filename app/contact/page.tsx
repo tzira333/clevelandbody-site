@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 
 import { useState } from 'react'
 
@@ -73,7 +73,6 @@ export default function ContactPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Contact Information */}
           <div className="bg-maroon text-white rounded-lg shadow-md p-8">
             <h2 className="text-2xl font-bold mb-6">Get In Touch</h2>
             
@@ -166,7 +165,6 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Contact Form */}
           <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
 
@@ -281,12 +279,22 @@ export default function ContactPage() {
                 />
               </div>
 
-              {/* SUBMIT BUTTON - USING CUSTOM CSS CLASS */}
               <div className="pt-4">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="submit-button-fix"
+                  style={{
+                    width: '100%',
+                    padding: '1rem 1.5rem',
+                    borderRadius: '0.5rem',
+                    fontWeight: 600,
+                    fontSize: '1.125rem',
+                    backgroundColor: '#800000',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.5 : 1
+                  }}
                 >
                   {loading ? 'Sending...' : 'Send Message'}
                 </button>
@@ -298,3 +306,4 @@ export default function ContactPage() {
     </div>
   )
 }
+
