@@ -33,43 +33,43 @@ export default function Header() {
             )}
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-3 xl:space-x-5">
-            <Link href="/" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
+          {/* Desktop Navigation - More Compact */}
+          <div className="hidden lg:flex items-center space-x-2 xl:space-x-4">
+            <Link href="/" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
               Home
             </Link>
-            <Link href="/services" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
+            <Link href="/services" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
               Services
             </Link>
-            <Link href="/insurance" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
+            <Link href="/insurance" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
               Insurance
             </Link>
-            <Link href="/gallery" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
+            <Link href="/gallery" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
               Gallery
             </Link>
-            <Link href="/reviews" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
+            <Link href="/reviews" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
               Reviews
             </Link>
-            <Link href="/contact" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
+            <Link href="/contact" className="hover:text-secondary-cream transition-colors font-medium text-xs xl:text-sm">
               Contact
             </Link>
             <Link 
               href="/portal" 
-              className="border-2 border-white px-3 py-1.5 rounded-lg font-semibold text-sm hover:bg-white hover:text-primary transition-all duration-200 whitespace-nowrap"
+              className="border-2 border-white px-2 py-1 rounded-lg font-semibold text-xs hover:bg-white hover:text-primary transition-all duration-200 whitespace-nowrap"
             >
-              Customer Portal
+              Portal
             </Link>
             <Link 
               href="/schedule" 
-              className="bg-white text-primary px-4 py-1.5 rounded-lg font-bold text-sm hover:bg-secondary-cream transition-all duration-200 shadow-lg whitespace-nowrap"
+              className="bg-white text-primary px-3 py-1 rounded-lg font-bold text-xs hover:bg-secondary-cream transition-all duration-200 shadow-lg whitespace-nowrap"
             >
-              Schedule Appointment
+              Schedule
             </Link>
             <Link 
               href="/admin" 
-              className="text-xs text-white/80 hover:text-white transition-colors whitespace-nowrap"
+              className="text-xs text-white/80 hover:text-white transition-colors whitespace-nowrap ml-2"
             >
-              Staff Login
+              Staff
             </Link>
           </div>
 
