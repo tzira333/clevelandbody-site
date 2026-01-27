@@ -135,7 +135,7 @@ export default function RootLayout({
       name: 'Cleveland',
       '@id': 'https://en.wikipedia.org/wiki/Cleveland',
     },
-    description: 'Expert auto body repair, collision repair, and custom painting in Cleveland, OH. Over 40 years of experience serving domestic and foreign vehicles.',
+    description: 'Expert auto body repair, collision repair, and custom painting in Cleveland, OH. Expert Auto Body, Custom Painting, Restoration & Collision Repair in Cleveland',
     slogan: 'Building Our Future On Service To You!',
     foundingDate: '1982',
     aggregateRating: {
