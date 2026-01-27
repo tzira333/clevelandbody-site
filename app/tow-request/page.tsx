@@ -1,14 +1,19 @@
 import { Metadata } from 'next'
 import TowRequestForm from './TowRequestForm'
 
-export const metadata: Metadata = {
-  title: 'Request Tow Service | 24/7 Auto Towing Cleveland',
-  description: 'Need a tow? Request emergency towing service in Cleveland, OH. Fast, reliable auto towing and transportation to our shop.',
-  openGraph: {
-    title: 'Request Tow Service | Domestic and Foreign Auto Body',
-    description: 'Emergency auto towing service in Cleveland. Fast response, professional care.',
-  },
+export const metadata = {
+  title: 'Request Tow Service | Domestic & Foreign Auto Body',
+  description: 'Request emergency tow service for your vehicle.',
 }
+
+export default function TowRequestPage() {
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <TowRequestForm />
+    </div>
+  )
+}
+
 
 export default function TowRequestPage() {
   return <TowRequestForm />

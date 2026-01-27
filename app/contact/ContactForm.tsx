@@ -5,7 +5,6 @@ import { formatPhoneInput } from '../../lib/utils/phone'
 
 export default function ContactForm() {
   const businessPhone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+12164818696'
-  const businessAddress = process.env.NEXT_PUBLIC_BUSINESS_ADDRESS || '17017 Saint Clair Ave, Cleveland, OH 44110'
 
   const formatPhoneDisplay = (phone: string) => {
     const cleaned = phone.replace(/\D/g, '')
@@ -75,138 +74,125 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-center mb-12">Contact Us</h1>
+    <div className="max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-6">Contact Us</h1>
 
-      <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-        {/* Contact Information */}
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Get In Touch</h2>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <span className="text-2xl">📞</span>
-                <div>
-                  <p className="font-semibold text-gray-900">Phone</p>
-                  <a href={`tel:${businessPhone}`} className="text-primary hover:underline text-lg">
-                    {formatPhoneDisplay(businessPhone)}
-                  </a>
-                </div>
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Contact Information - Left */}
+        <div className="bg-gray-50 p-6 rounded-lg">
+          <h2 className="text-xl font-bold mb-4">Get In Touch</h2>
+          <div className="space-y-3">
+            <div className="flex items-start space-x-2">
+              <span className="text-xl">📞</span>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Phone</p>
+                <a href={`tel:${businessPhone}`} className="text-primary hover:underline">
+                  {formatPhoneDisplay(businessPhone)}
+                </a>
               </div>
+            </div>
 
-              <div className="flex items-start space-x-3">
-                <span className="text-2xl">✉️</span>
-                <div>
-                  <p className="font-semibold text-gray-900">Email</p>
-                  <a href="mailto:domesticbody@gmail.com" className="text-primary hover:underline">
-                    domesticbody@gmail.com
-                  </a>
-                </div>
+            <div className="flex items-start space-x-2">
+              <span className="text-xl">✉️</span>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Email</p>
+                <a href="mailto:domesticbody@gmail.com" className="text-primary hover:underline text-sm">
+                  domesticbody@gmail.com
+                </a>
               </div>
+            </div>
 
-              <div className="flex items-start space-x-3">
-                <span className="text-2xl">📍</span>
-                <div>
-                  <p className="font-semibold text-gray-900">Address</p>
-                  <p className="text-gray-700">{businessAddress}</p>
-                </div>
+            <div className="flex items-start space-x-2">
+              <span className="text-xl">📍</span>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Address</p>
+                <p className="text-gray-700 text-sm">17017 Saint Clair Ave<br />Cleveland, OH 44110</p>
               </div>
+            </div>
 
-              <div className="flex items-start space-x-3">
-                <span className="text-2xl">⏰</span>
-                <div>
-                  <p className="font-semibold text-gray-900">Business Hours</p>
-                  <p className="text-gray-700">Monday - Friday: 8:00 AM - 4:30 PM</p>
-                  <p className="text-gray-700">Saturday: 9:00 AM - 1:00 PM</p>
-                  <p className="text-gray-700">Sunday: Closed</p>
-                </div>
+            <div className="flex items-start space-x-2">
+              <span className="text-xl">⏰</span>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Hours</p>
+                <p className="text-gray-700 text-sm">Mon-Fri: 8:00 AM - 4:30 PM</p>
+                <p className="text-gray-700 text-sm">Sat: 9:00 AM - 1:00 PM</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Contact Form */}
+        {/* Contact Form - Right */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
-          
           {success && (
-            <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-              Message sent successfully! We will get back to you soon.
+            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg text-sm">
+              Message sent! We'll get back to you soon.
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Name *
-              </label>
+              <label className="block text-gray-700 font-semibold mb-1 text-sm">Name *</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                 placeholder="Your name"
               />
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Phone Number *
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={handlePhoneChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="216-555-1234"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1 text-sm">Phone *</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handlePhoneChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="216-555-1234"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1 text-sm">Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="name@example.com"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="name@example.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Subject *
-              </label>
+              <label className="block text-gray-700 font-semibold mb-1 text-sm">Subject *</label>
               <input
                 type="text"
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                 placeholder="How can we help?"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Message *
-              </label>
+              <label className="block text-gray-700 font-semibold mb-1 text-sm">Message *</label>
               <textarea
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 required
-                rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Tell us more about your needs..."
+                rows={5}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                placeholder="Tell us more..."
               />
             </div>
 
             {error && (
-              <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
                 {error}
               </div>
             )}
@@ -214,7 +200,7 @@ export default function ContactForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-6 py-4 bg-primary text-white rounded-lg font-semibold text-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
               {loading ? 'Sending...' : 'Send Message'}
             </button>
