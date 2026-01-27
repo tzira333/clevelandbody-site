@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [logoError, setLogoError] = useState(false)
 
   const businessPhone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+12164818696'
   const phoneDisplay = businessPhone.replace(/^\+1/, '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3')
@@ -13,14 +14,23 @@ export default function Header() {
     <header className="bg-primary text-white shadow-lg sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Logo - Using standard img tag */}
+          {/* Logo with fallback */}
           <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
-            <img
-              src="/logo.jpg"
-              alt="Domestic and Foreign Auto Body Inc."
-              className="h-16 w-auto md:h-20"
-              loading="eager"
-            />
+            {!logoError ? (
+              <img
+                src="https://www.genspark.ai/api/files/s/JA8Y2iRU"
+                alt="Domestic and Foreign Auto Body Inc."
+                className="h-16 w-auto md:h-20"
+                onError={() => setLogoError(true)}
+                loading="eager"
+              />
+            ) : (
+              <div className="h-16 md:h-20 flex items-center">
+                <span className="text-lg md:text-xl font-bold text-white">
+                  DOMESTIC & FOREIGN<br/>AUTO BODY INC.
+                </span>
+              </div>
+            )}
           </Link>
 
           {/* Desktop Navigation */}
@@ -162,4 +172,3 @@ export default function Header() {
     </header>
   )
 }
-
