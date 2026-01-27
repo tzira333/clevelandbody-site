@@ -63,7 +63,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-12 pb-24">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -117,8 +117,8 @@ export default function ContactPage() {
                 </div>
                 <div className="ml-4">
                   <p className="font-semibold">Address</p>
-                  <p>123 Main Street</p>
-                  <p>Cleveland, OH 44101</p>
+                  <p>17017 Saint Clair Ave</p>
+                  <p>Cleveland, OH 44110</p>
                 </div>
               </div>
 
@@ -169,7 +169,7 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white rounded-lg shadow-md p-8">
+          <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
 
             {success && (
@@ -248,13 +248,17 @@ export default function ContactPage() {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-maroon text-white py-3 px-6 rounded-lg font-semibold hover:bg-maroon-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Sending...' : 'Send Message'}
-              </button>
+              {/* SUBMIT BUTTON - FIXED */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-maroon text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-red-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  style={{ display: 'block', visibility: 'visible' }}
+                >
+                  {loading ? 'Sending...' : 'Send Message'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

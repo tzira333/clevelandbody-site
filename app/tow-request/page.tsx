@@ -55,9 +55,9 @@ export default function TowRequestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-12 pb-24">
       <div className="container mx-auto px-4 max-w-2xl">
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Request Tow Service
           </h1>
@@ -192,6 +192,7 @@ export default function TowRequestPage() {
                     <option value="1:00 PM">1:00 PM</option>
                     <option value="2:00 PM">2:00 PM</option>
                     <option value="3:00 PM">3:00 PM</option>
+                    <option value="4:00 PM">4:00 PM</option>
                   </select>
                 </div>
               </div>
@@ -209,15 +210,19 @@ export default function TowRequestPage() {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-maroon text-white py-3 px-6 rounded-lg font-semibold hover:bg-maroon-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Submitting...' : 'Request Tow Service'}
-              </button>
+              {/* SUBMIT BUTTON - FIXED */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-maroon text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-red-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  style={{ display: 'block', visibility: 'visible' }}
+                >
+                  {loading ? 'Submitting...' : 'Request Tow Service'}
+                </button>
+              </div>
 
-              <p className="text-sm text-gray-500 text-center">
+              <p className="text-sm text-gray-500 text-center pt-2">
                 Emergency towing? Call us directly at{' '}
                 <a href="tel:+12164818696" className="text-maroon hover:underline font-semibold">
                   (216) 481-8696
