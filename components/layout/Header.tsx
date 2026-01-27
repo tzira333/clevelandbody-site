@@ -13,49 +13,50 @@ export default function Header() {
 
   return (
     <header className="bg-primary text-white shadow-lg sticky top-0 z-50">
-      <nav className="container mx-auto px-4 py-4">
+      <nav className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link href="/" className="flex items-center hover:opacity-90 transition-opacity">
+          <Link href="/" className="flex-shrink-0 hover:opacity-90 transition-opacity">
             <Image
               src="https://www.genspark.ai/api/files/s/JA8Y2iRU"
-              alt="Domestic and Foreign Auto Body Inc. - Cleveland's Premier Auto Body Shop"
-              width={180}
-              height={180}
+              alt="Domestic and Foreign Auto Body Inc."
+              width={160}
+              height={160}
               priority
-              className="h-20 w-auto md:h-24"
+              className="h-16 w-auto md:h-20"
+              unoptimized
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            <Link href="/" className="hover:text-secondary-cream transition-colors font-medium">
+          <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
+            <Link href="/" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
               Home
             </Link>
-            <Link href="/services" className="hover:text-secondary-cream transition-colors font-medium">
+            <Link href="/services" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
               Services
             </Link>
-            <Link href="/insurance" className="hover:text-secondary-cream transition-colors font-medium">
+            <Link href="/insurance" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
               Insurance
             </Link>
-            <Link href="/gallery" className="hover:text-secondary-cream transition-colors font-medium">
+            <Link href="/gallery" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
               Gallery
             </Link>
-            <Link href="/reviews" className="hover:text-secondary-cream transition-colors font-medium">
+            <Link href="/reviews" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
               Reviews
             </Link>
-            <Link href="/contact" className="hover:text-secondary-cream transition-colors font-medium">
+            <Link href="/contact" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
               Contact
             </Link>
             <Link 
               href="/portal" 
-              className="border-2 border-white px-4 py-2 rounded-lg font-semibold hover:bg-white hover:text-primary transition-all duration-200"
+              className="border-2 border-white px-3 py-1.5 rounded-lg font-semibold text-sm hover:bg-white hover:text-primary transition-all duration-200 whitespace-nowrap"
             >
               Customer Portal
             </Link>
             <Link 
               href="/schedule" 
-              className="bg-white text-primary px-6 py-2 rounded-lg font-bold hover:bg-secondary-cream transition-all duration-200 shadow-lg"
+              className="bg-white text-primary px-4 py-1.5 rounded-lg font-bold text-sm hover:bg-secondary-cream transition-all duration-200 shadow-lg whitespace-nowrap"
             >
               Schedule Appointment
             </Link>
