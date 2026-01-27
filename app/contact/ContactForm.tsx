@@ -240,8 +240,6 @@ export default function ContactForm() {
 
 
 
-
-
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send message')
       }
