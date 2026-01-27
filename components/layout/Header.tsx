@@ -34,7 +34,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
+          <div className="hidden lg:flex items-center space-x-3 xl:space-x-5">
             <Link href="/" className="hover:text-secondary-cream transition-colors font-medium text-sm xl:text-base">
               Home
             </Link>
@@ -64,6 +64,12 @@ export default function Header() {
               className="bg-white text-primary px-4 py-1.5 rounded-lg font-bold text-sm hover:bg-secondary-cream transition-all duration-200 shadow-lg whitespace-nowrap"
             >
               Schedule Appointment
+            </Link>
+            <Link 
+              href="/admin" 
+              className="text-xs text-white/80 hover:text-white transition-colors whitespace-nowrap"
+            >
+              Staff Login
             </Link>
           </div>
 
@@ -142,6 +148,13 @@ export default function Header() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Schedule Appointment
+            </Link>
+            <Link 
+              href="/admin" 
+              className="block text-center py-2 text-sm text-white/80 hover:text-white transition-colors border-t border-primary-light pt-4 mt-4"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Staff Login
             </Link>
           </div>
         )}
