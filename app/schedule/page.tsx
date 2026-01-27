@@ -14,7 +14,3 @@ export default function SchedulePage() {
     </div>
   )
 }}
-
-export default function SchedulePage() {
-  return <ScheduleForm />
-}

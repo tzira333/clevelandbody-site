@@ -14,7 +14,3 @@ export default function TowRequestPage() {
   )
 }
 
-
-export default function TowRequestPage() {
-  return <TowRequestForm />
-}
