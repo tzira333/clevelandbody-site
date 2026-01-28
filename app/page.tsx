@@ -9,8 +9,6 @@ export default function Home() {
   return (
     <>
       <Hero />
-      {/* Add more sections here as you build them */}
     </>
   )
 }
-
