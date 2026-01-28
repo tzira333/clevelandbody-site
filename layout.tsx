@@ -7,7 +7,7 @@ import Footer from '@/components/layout/Footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Domestic and Foreign Auto Body Inc. | Cleveland Auto Body & Collision Repair',
+  title: 'Domestic and Foreign Auto Body Inc. | Auto Body & Collision Repair | Cleveland, Ohio',
   description: 'Expert auto body repair, collision repair, and custom painting in Cleveland, OH.  Major & minor collision repair, complete paint & touch-ups.',
   keywords: 'auto body repair, collision center, car repair Cleveland, auto painting, body shop Cleveland OH,Old Schools, Towing, Tow Service, Insurnace claim, accident, damage, car accident, stolen, theft',
   openGraph: {
