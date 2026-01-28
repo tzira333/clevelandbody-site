@@ -20,10 +20,17 @@ export default function TowRequestForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [confirmationNumber, setConfirmationNumber] = useState('')
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneInput(e.target.value)
     setFormData({ ...formData, phone: formatted })
+  }
+
+  const generateConfirmationNumber = () => {
+    const timestamp = Date.now().toString().slice(-6)
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+    return `TOW-${timestamp}-${random}`
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,11 +56,9 @@ export default function TowRequestForm() {
         throw new Error(data.message || 'Failed to submit tow request')
       }
 
+      const confNumber = generateConfirmationNumber()
+      setConfirmationNumber(confNumber)
       setSuccess(true)
-      
-      setTimeout(() => {
-        router.push('/')
-      }, 3000)
     } catch (err: any) {
       setError(err.message || 'An error occurred. Please try again.')
     } finally {
@@ -63,21 +68,120 @@ export default function TowRequestForm() {
 
   if (success) {
     return (
-      <div className="max-w-2xl mx-auto text-center py-8">
-        <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6">
-          <div className="text-5xl mb-3">🚛✅</div>
-          <h2 className="text-2xl font-bold text-green-800 mb-3">
+      <div className="max-w-3xl mx-auto">
+        {/* Success Header */}
+        <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6 mb-6 text-center">
+          <div className="text-6xl mb-3">🚛✅</div>
+          <h2 className="text-3xl font-bold text-green-800 mb-2">
             Tow Request Received!
           </h2>
-          <p className="text-base text-gray-700 mb-4">
-            We've received your tow request and will dispatch a truck shortly.
+          <div className="bg-white border-2 border-green-600 rounded-lg p-4 mt-4 inline-block">
+            <p className="text-sm text-gray-600 mb-1">Confirmation Number</p>
+            <p className="text-2xl font-bold text-primary">{confirmationNumber}</p>
+          </div>
+        </div>
+
+        {/* URGENT Notice */}
+        <div className="bg-red-50 border-2 border-red-500 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-bold text-red-900 mb-3 flex items-center">
+            <span className="text-2xl mr-2">🚨</span>
+            URGENT: Call Immediately to Dispatch Tow Truck
+          </h3>
+          <p className="text-gray-700 mb-4">
+            To dispatch a tow truck and confirm your location, please call us NOW:
           </p>
-          <p className="text-gray-600 text-sm">
-            Urgent? Call{' '}
-            <a href="tel:+12164818696" className="text-primary font-bold hover:underline">
-              (216) 481-8696
-            </a>
+          <a 
+            href="tel:+12164818696"
+            className="block text-center bg-red-700 text-white font-bold text-2xl py-4 rounded-lg hover:bg-red-800 transition-colors animate-pulse"
+          >
+            📞 CALL (216) 481-8696
+          </a>
+          <p className="text-sm text-gray-600 mt-3 text-center">
+            Reference confirmation number: <span className="font-bold">{confirmationNumber}</span>
           </p>
+        </div>
+
+        {/* Submitted Information */}
+        <div className="bg-white border-2 border-gray-300 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+            Your Tow Request Details
+          </h3>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">Name</p>
+              <p className="font-semibold text-gray-900">{formData.name}</p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600">Phone Number</p>
+              <p className="font-semibold text-gray-900">{formData.phone}</p>
+            </div>
+
+            {formData.email && (
+              <div>
+                <p className="text-sm text-gray-600">Email</p>
+                <p className="font-semibold text-gray-900">{formData.email}</p>
+              </div>
+            )}
+
+            <div>
+              <p className="text-sm text-gray-600">Vehicle Information</p>
+              <p className="font-semibold text-gray-900">{formData.vehicleInfo}</p>
+            </div>
+
+            <div className="md:col-span-2">
+              <p className="text-sm text-gray-600">Current Location</p>
+              <p className="font-semibold text-gray-900">{formData.location}</p>
+            </div>
+
+            {formData.destination && (
+              <div className="md:col-span-2">
+                <p className="text-sm text-gray-600">Tow Destination</p>
+                <p className="font-semibold text-gray-900">{formData.destination}</p>
+              </div>
+            )}
+
+            {formData.message && (
+              <div className="md:col-span-2">
+                <p className="text-sm text-gray-600">Additional Information</p>
+                <p className="font-semibold text-gray-900 whitespace-pre-wrap">{formData.message}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Business Hours */}
+        <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">24/7 Emergency Towing Available</h3>
+          <p className="text-gray-700 mb-2">Call anytime for towing service</p>
+          <div className="space-y-1 text-gray-700 text-sm">
+            <p><span className="font-semibold">Office Hours:</span></p>
+            <p>Monday - Friday: 8:00 AM - 4:30 PM</p>
+            <p>Saturday: 9:00 AM - 1:00 PM</p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <a
+            href="tel:+12164818696"
+            className="flex-1 px-6 py-3 bg-red-700 text-white text-center rounded-lg font-semibold hover:bg-red-800 transition-colors"
+          >
+            📞 Call Now
+          </a>
+          <button
+            onClick={() => window.print()}
+            className="flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+          >
+            🖨️ Print Confirmation
+          </button>
+          <button
+            onClick={() => router.push('/')}
+            className="flex-1 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors"
+          >
+            Return to Home
+          </button>
         </div>
       </div>
     )
@@ -204,3 +308,4 @@ export default function TowRequestForm() {
     </div>
   )
 }
+

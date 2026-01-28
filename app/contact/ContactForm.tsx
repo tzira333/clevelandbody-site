@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatPhoneInput } from '../../lib/utils/phone'
 
 export default function ContactForm() {
+  const router = useRouter()
   const businessPhone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+12164818696'
 
   const formatPhoneDisplay = (phone: string) => {
@@ -26,10 +28,17 @@ export default function ContactForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [confirmationNumber, setConfirmationNumber] = useState('')
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneInput(e.target.value)
     setFormData({ ...formData, phone: formatted })
+  }
+
+  const generateConfirmationNumber = () => {
+    const timestamp = Date.now().toString().slice(-6)
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+    return `MSG-${timestamp}-${random}`
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,18 +68,126 @@ export default function ContactForm() {
         throw new Error(data.message || 'Failed to send message')
       }
 
+      const confNumber = generateConfirmationNumber()
+      setConfirmationNumber(confNumber)
       setSuccess(true)
-      setFormData({ name: '', phone: '', email: '', subject: '', message: '' })
-      
-      setTimeout(() => {
-        setSuccess(false)
-      }, 5000)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred. Please try again.'
       setError(errorMessage)
     } finally {
       setLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        {/* Success Header */}
+        <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6 mb-6 text-center">
+          <div className="text-6xl mb-3">✉️✅</div>
+          <h2 className="text-3xl font-bold text-green-800 mb-2">
+            Message Received!
+          </h2>
+          <div className="bg-white border-2 border-green-600 rounded-lg p-4 mt-4 inline-block">
+            <p className="text-sm text-gray-600 mb-1">Confirmation Number</p>
+            <p className="text-2xl font-bold text-primary">{confirmationNumber}</p>
+          </div>
+        </div>
+
+        {/* Call to Confirm */}
+        <div className="bg-blue-50 border-2 border-blue-500 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-bold text-blue-900 mb-3 flex items-center">
+            <span className="text-2xl mr-2">📞</span>
+            Please Call to Confirm Receipt
+          </h3>
+          <p className="text-gray-700 mb-4">
+            To ensure we received your message and to get an immediate response, please call us:
+          </p>
+          <a 
+            href="tel:+12164818696"
+            className="block text-center bg-blue-700 text-white font-bold text-2xl py-4 rounded-lg hover:bg-blue-800 transition-colors"
+          >
+            (216) 481-8696
+          </a>
+          <p className="text-sm text-gray-600 mt-3 text-center">
+            Reference confirmation number: <span className="font-bold">{confirmationNumber}</span>
+          </p>
+        </div>
+
+        {/* Submitted Information */}
+        <div className="bg-white border-2 border-gray-300 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+            Your Message Details
+          </h3>
+          
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Name</p>
+                <p className="font-semibold text-gray-900">{formData.name}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-600">Phone Number</p>
+                <p className="font-semibold text-gray-900">{formData.phone}</p>
+              </div>
+
+              {formData.email && (
+                <div>
+                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="font-semibold text-gray-900">{formData.email}</p>
+                </div>
+              )}
+
+              <div>
+                <p className="text-sm text-gray-600">Subject</p>
+                <p className="font-semibold text-gray-900">{formData.subject}</p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600 mb-2">Message</p>
+              <div className="bg-gray-50 p-4 rounded border border-gray-200">
+                <p className="text-gray-900 whitespace-pre-wrap">{formData.message}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Business Hours */}
+        <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">We'll Respond Within 24 Hours</h3>
+          <p className="text-gray-700 mb-3">Our typical response time is within a few hours during business hours.</p>
+          <div className="space-y-1 text-gray-700">
+            <p><span className="font-semibold">Monday - Friday:</span> 8:00 AM - 4:30 PM</p>
+            <p><span className="font-semibold">Saturday:</span> 9:00 AM - 1:00 PM</p>
+            <p><span className="font-semibold">Sunday:</span> Closed</p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <a
+            href="tel:+12164818696"
+            className="flex-1 px-6 py-3 bg-blue-700 text-white text-center rounded-lg font-semibold hover:bg-blue-800 transition-colors"
+          >
+            📞 Call Now
+          </a>
+          <button
+            onClick={() => window.print()}
+            className="flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+          >
+            🖨️ Print Confirmation
+          </button>
+          <button
+            onClick={() => router.push('/')}
+            className="flex-1 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors"
+          >
+            Return to Home
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -123,12 +240,6 @@ export default function ContactForm() {
 
         {/* Contact Form - Right */}
         <div>
-          {success && (
-            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg text-sm">
-              Message sent! We'll get back to you soon.
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <label className="block text-gray-700 font-semibold mb-1 text-sm">Name *</label>
