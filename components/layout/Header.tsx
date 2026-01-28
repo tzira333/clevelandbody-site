@@ -58,8 +58,8 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Desktop Navigation - Ultra Compact */}
-          <div className="hidden lg:flex items-center justify-start flex-grow gap-1.5 ml-4">
+          {/* Desktop Navigation - RIGHT JUSTIFIED */}
+          <div className="hidden lg:flex items-center justify-end flex-grow gap-1.5 ml-4">
             <Link href="/" className="text-xs text-white hover:text-secondary-cream transition-colors whitespace-nowrap px-1">
               Home
             </Link>

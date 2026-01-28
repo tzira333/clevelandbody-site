@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Domestic and Foreign Auto Body Inc. | Cleveland Auto Body & Collision Repair',
-  description: 'Expert auto body repair, collision repair, and custom painting in Cleveland, OH. Over 40 years of experience. Major & minor collision repair, complete paint & touch-ups.',
-  keywords: 'auto body repair, collision center, car repair Cleveland, auto paint, body shop Cleveland OH',
+  description: 'Expert auto body repair, collision repair, and custom painting in Cleveland, OH.  Major & minor collision repair, complete paint & touch-ups.',
+  keywords: 'auto body repair, collision center, car repair Cleveland, auto painting, body shop Cleveland OH,Old Schools, Towing, Tow Service, Insurnace claim, accident, damage, car accident, stolen, theft',
   openGraph: {
     title: 'Domestic and Foreign Auto Body Inc.',
     description: 'Cleveland\'s trusted auto body & collision repair specialists',
