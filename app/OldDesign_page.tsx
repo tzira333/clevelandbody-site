@@ -1,4 +1,4 @@
-import Hero from '../components/home/Hero'
+import Hero from '@/components/home/Hero'
 
 export const metadata = {
   title: 'Cleveland Auto Body Repair | Domestic & Foreign Vehicles',
@@ -9,6 +9,8 @@ export default function Home() {
   return (
     <>
       <Hero />
+      {/* Add more sections here as you build them */}
     </>
   )
 }
+
