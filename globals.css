@@ -3,31 +3,75 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  /* Flag color palette */
+  --red: 128, 0, 0;
+  --white: 255, 255, 255;
+  --blue: 29, 78, 137;
+  --background: var(--white);
+  --foreground: 20, 20, 20;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background: 20, 20, 20;
+    --foreground: var(--white);
   }
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: rgb(var(--foreground));
+  background: rgb(var(--background));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Fade-in animation for tooltip */
+  .animate-fadeIn {
+    animation: fadeIn 0.2s ease-in-out;
+  }
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Button styles */
+.btn-flag-red {
+  @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition-colors;
+}
+
+.btn-flag-white {
+  @apply bg-white hover:bg-gray-100 text-red-600 font-semibold py-2 px-4 rounded border-2 border-red-600 transition-colors;
+}
+
+.btn-flag-blue {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors;
+}
+
+/* Print styles */
+@media print {
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
