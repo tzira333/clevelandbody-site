@@ -1,460 +1,296 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, FormEvent, ChangeEvent } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { normalizePhone, formatPhoneDisplay } from '../../lib/utils/phone'
+import { normalizePhone, formatPhoneDisplay } from '@/lib/utils/phone'
 
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 interface Appointment {
   id: string
   customer_name: string
   customer_phone: string
   customer_email: string
+  service_type: string
   appointment_date: string
   appointment_time: string
-  service_type: string
-  vehicle_info: string
-  message: string
   status: string
-  created_at: string
-  updated_at: string
-}
-
-interface AppointmentPhoto {
-  id: string
-  appointment_id: string
-  photo_url: string
-  photo_path: string
-  caption: string
-  uploaded_by: string
+  vehicle_year?: string
+  vehicle_make?: string
+  vehicle_model?: string
+  damage_description?: string
   created_at: string
 }
 
-export default function CustomerPortalPage() {
-  const [step, setStep] = useState<'login' | 'appointments'>('login')
-  const [loginMethod, setLoginMethod] = useState<'phone' | 'email'>('phone')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+export default function CustomerPortal() {
+  const [phone, setPhone] = useState('')
   const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [appointmentPhotos, setAppointmentPhotos] = useState<Record<string, AppointmentPhoto[]>>({})
-  const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [searched, setSearched] = useState(false)
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-  const normalizeEmail = (email: string): string => {
-    return email.toLowerCase().trim()
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    
+    // Remove all non-digit characters
+    const digitsOnly = value.replace(/\D/g, '')
+    
+    // Limit to 10 digits
+    const limitedDigits = digitsOnly.slice(0, 10)
+    
+    // Format as user types: XXX-XXX-XXXX
+    let formatted = limitedDigits
+    if (limitedDigits.length > 6) {
+      formatted = `${limitedDigits.slice(0, 3)}-${limitedDigits.slice(3, 6)}-${limitedDigits.slice(6, 10)}`
+    } else if (limitedDigits.length > 3) {
+      formatted = `${limitedDigits.slice(0, 3)}-${limitedDigits.slice(3)}`
+    }
+    
+    setPhone(formatted)
   }
 
-  const loadPhotosForAppointment = async (appointmentId: string) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    setSearched(true)
+
+    // Normalize phone number to digits only
+    const normalizedPhone = normalizePhone(phone)
+
+    // Validate phone number is exactly 10 digits
+    if (normalizedPhone.length !== 10) {
+      setError('Please enter a valid 10-digit phone number')
+      setLoading(false)
+      return
+    }
+
     try {
-      const supabase = createClient(supabaseUrl, supabaseKey)
-      const { data, error } = await supabase
-        .from('appointment_photos')
+      const { data, error: queryError } = await supabase
+        .from('appointments')
         .select('*')
-        .eq('appointment_id', appointmentId)
+        .eq('customer_phone', normalizedPhone)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (queryError) throw queryError
 
-      setAppointmentPhotos(prev => ({
-        ...prev,
-        [appointmentId]: data || []
-      }))
-    } catch (err) {
-      console.error('Error loading photos:', err)
-    }
-  }
-
-  const handlePhotoUpload = async (appointmentId: string, files: FileList | null) => {
-    if (!files || files.length === 0) return
-
-    setUploadingPhoto(appointmentId)
-    setUploadProgress(0)
-    setError('')
-
-    try {
-      const supabase = createClient(supabaseUrl, supabaseKey)
-      const uploadedPhotos: AppointmentPhoto[] = []
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        
-        if (!file.type.startsWith('image/')) {
-          throw new Error(`${file.name} is not an image file`)
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
-          throw new Error(`${file.name} is too large. Max size is 5MB`)
-        }
-
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${appointmentId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('customer-photos')
-          .upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: false
-          })
-
-        if (uploadError) throw uploadError
-
-        const { data: urlData } = supabase.storage
-          .from('customer-photos')
-          .getPublicUrl(fileName)
-
-        const { data: photoRecord, error: dbError } = await supabase
-          .from('appointment_photos')
-          .insert({
-            appointment_id: appointmentId,
-            photo_url: urlData.publicUrl,
-            photo_path: fileName,
-            caption: file.name,
-            uploaded_by: 'customer'
-          })
-          .select()
-          .single()
-
-        if (dbError) throw dbError
-
-        uploadedPhotos.push(photoRecord)
-        setUploadProgress(Math.round(((i + 1) / files.length) * 100))
-      }
-
-      await loadPhotosForAppointment(appointmentId)
-      alert(`Successfully uploaded ${uploadedPhotos.length} photo(s)!`)
+      setAppointments(data || [])
     } catch (err: any) {
-      console.error('Photo upload error:', err)
-      setError(err.message || 'Failed to upload photos. Please try again.')
+      setError('Failed to retrieve appointments. Please try again.')
+      console.error('Error fetching appointments:', err)
     } finally {
-      setUploadingPhoto(null)
-      setUploadProgress(0)
-    }
-  }
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-
-    try {
-      const supabase = createClient(supabaseUrl, supabaseKey)
-      let matchedAppointments: Appointment[] = []
-
-      if (loginMethod === 'phone') {
-        // CRITICAL FIX: Use normalizePhone utility for consistent lookup
-        const normalized = normalizePhone(phoneNumber)
-        console.log('Searching by normalized phone:', normalized)
-
-        const { data, error } = await supabase
-          .from('appointments')
-          .select('*')
-          .eq('customer_phone', normalized) // Match digits only
-          .order('created_at', { ascending: false })
-
-        if (error) throw error
-        matchedAppointments = data || []
-      } else {
-        const normalizedEmail = normalizeEmail(email)
-        console.log('Searching by email:', normalizedEmail)
-
-        const { data, error } = await supabase
-          .from('appointments')
-          .select('*')
-          .eq('customer_email', normalizedEmail)
-          .order('created_at', { ascending: false })
-
-        if (error) throw error
-        matchedAppointments = data || []
-      }
-
-      if (matchedAppointments.length === 0) {
-        const identifier = loginMethod === 'phone' 
-          ? formatPhoneDisplay(phoneNumber)
-          : email
-        setError(`No appointments found for ${identifier}. Please check your ${loginMethod === 'phone' ? 'phone number' : 'email'} or contact us at (216) 481-8696.`)
-        return
-      }
-
-      setAppointments(matchedAppointments)
-      
-      for (const appointment of matchedAppointments) {
-        await loadPhotosForAppointment(appointment.id)
-      }
-
-      setStep('appointments')
-    } catch (err: any) {
-      console.error('Portal login error:', err)
-      setError(`Error: ${err.message || 'Unable to retrieve appointments. Please try again or call (216) 481-8696.'}`)
-    } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300'
-      case 'confirmed': return 'bg-blue-100 text-blue-800 border-blue-300'
-      case 'in-progress': case 'in progress': return 'bg-purple-100 text-purple-800 border-purple-300'
-      case 'completed': return 'bg-green-100 text-green-800 border-green-300'
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-300'
-      default: return 'bg-gray-100 text-gray-800 border-gray-300'
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-300'
+      case 'in-progress':
+        return 'bg-blue-100 text-blue-800 border-blue-300'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-300'
+      default:
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300'
     }
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending': return '⏳'
-      case 'confirmed': return '✓'
-      case 'in-progress': case 'in progress': return '🔧'
-      case 'completed': return '✅'
-      case 'cancelled': return '❌'
-      default: return '📋'
+  const getServiceTypeLabel = (serviceType: string) => {
+    const types: Record<string, string> = {
+      'express-care': '⚡ Express Care',
+      'schedule': '📅 Schedule',
+      'tow-service': '🚛 Tow Service',
+      'contact-inquiry': '💬 Contact',
     }
+    return types[serviceType] || serviceType
   }
 
-  if (step === 'login') {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Customer Portal</h1>
-            <p className="text-gray-700">
-              Enter your phone number or email to view your repair status and upload photos.
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-xl p-8 mb-8">
+          <div className="text-center mb-6">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Customer Portal
+            </h1>
+            <p className="text-gray-600">
+              View your appointment status and details
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="card space-y-6">
-            {/* Login Method Toggle */}
-            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
-              <button
-                type="button"
-                onClick={() => setLoginMethod('phone')}
-                className={`flex-1 py-2 px-4 rounded-md font-semibold transition-colors ${
-                  loginMethod === 'phone'
-                    ? 'bg-primary text-white'
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                📞 Phone
-              </button>
-              <button
-                type="button"
-                onClick={() => setLoginMethod('email')}
-                className={`flex-1 py-2 px-4 rounded-md font-semibold transition-colors ${
-                  loginMethod === 'email'
-                    ? 'bg-primary text-white'
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                ✉️ Email
-              </button>
+          {/* Search Form */}
+          <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+            <div className="mb-6">
+              <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+                Enter Your Phone Number
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                value={phone}
+                onChange={handlePhoneChange}
+                required
+                maxLength={12}
+                placeholder="216-481-8696"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg font-semibold text-gray-900"
+                autoComplete="tel"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Enter your 10-digit phone number (e.g., 216-481-8696)
+              </p>
             </div>
 
-            {/* Phone Input */}
-            {loginMethod === 'phone' && (
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    // Allow any input format - we normalize on submit
-                    setPhoneNumber(e.target.value)
-                  }}
-                  placeholder="216-555-1234 or 2165551234"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
-                />
-                <p className="text-sm text-gray-600 mt-1">
-                  Enter the phone number you used when scheduling (any format works)
-                </p>
-              </div>
-            )}
-
-            {/* Email Input */}
-            {loginMethod === 'email' && (
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
-                />
-                <p className="text-sm text-gray-600 mt-1">
-                  Enter the email address you used when scheduling
-                </p>
-              </div>
-            )}
-
             {error && (
-              <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-                {error}
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+                <p className="text-red-700 font-medium">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+              className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
             >
-              {isLoading ? 'Searching...' : 'View My Appointments'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Searching...
+                </span>
+              ) : (
+                '🔍 View My Appointments'
+              )}
             </button>
-
-            <div className="text-center pt-4 border-t">
-              <p className="text-gray-600 text-sm mb-2">Need help?</p>
-              <a href="tel:+12164818696" className="text-primary font-bold hover:underline">
-                Call (216) 481-8696
-              </a>
-            </div>
           </form>
-        </div>
-      </div>
-    )
-  }
 
-  // Appointments view
-  return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Appointments</h1>
-            <p className="text-gray-700">
-              {loginMethod === 'phone' ? `Phone: ${formatPhoneDisplay(phoneNumber)}` : `Email: ${email}`}
+          {/* Contact Info */}
+          <div className="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
+            <p className="mb-2">
+              <strong>Need Help?</strong>
             </p>
+            <p>
+              Call us at{' '}
+              <a href="tel:+12164818696" className="text-red-600 font-semibold hover:underline">
+                (216) 481-8696
+              </a>
+            </p>
+            <p className="mt-1">17017 Saint Clair Ave, Cleveland, OH 44110</p>
           </div>
-          <button
-            onClick={() => {
-              setStep('login')
-              setPhoneNumber('')
-              setEmail('')
-              setAppointments([])
-              setAppointmentPhotos({})
-              setError('')
-            }}
-            className="text-primary hover:underline font-semibold"
-          >
-            ← Back to Login
-          </button>
         </div>
 
-        <div className="space-y-6">
-          {appointments.map((appointment) => (
-            <div key={appointment.id} className="card hover:shadow-xl transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 ${getStatusColor(appointment.status)}`}>
-                  <span className="mr-2">{getStatusIcon(appointment.status)}</span>
-                  {appointment.status.toUpperCase()}
-                </span>
-                <span className="text-sm text-gray-500">
-                  Submitted {new Date(appointment.created_at).toLocaleDateString()}
-                </span>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{appointment.vehicle_info}</h3>
-                    <p className="text-gray-700"><span className="font-semibold">Service:</span> {appointment.service_type}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Date:</span>{' '}
-                      {new Date(appointment.appointment_date).toLocaleDateString('en-US', {
-                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                      })}
-                    </p>
-                    <p className="text-gray-700"><span className="font-semibold">Time:</span> {appointment.appointment_time}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Contact:</span> {formatPhoneDisplay(appointment.customer_phone)}
-                    </p>
-                    {appointment.customer_email && (
-                      <p className="text-gray-700">
-                        <span className="font-semibold">Email:</span> {appointment.customer_email}
-                      </p>
-                    )}
-                  </div>
-                  {appointment.message && (
-                    <div>
-                      <p className="font-semibold text-gray-900 mb-1">Notes:</p>
-                      <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded whitespace-pre-wrap">{appointment.message}</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <div className="bg-primary-light/10 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Contact Us</h4>
-                    <a href="tel:+12164818696" className="flex items-center text-primary hover:underline mb-2">
-                      📞 (216) 481-8696
-                    </a>
-                    <p className="text-sm text-gray-600">
-                      Mon-Fri: 8:00 AM - 4:30 PM<br />
-                      Sat: 9:00 AM - 1:00 PM
-                    </p>
-                  </div>
+        {/* Results */}
+        {searched && (
+          <div className="space-y-4">
+            {appointments.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-lg p-12 text-center">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  No Appointments Found
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  We couldn't find any appointments for{' '}
+                  <span className="font-semibold">{formatPhoneDisplay(phone)}</span>
+                </p>
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-left">
+                  <p className="text-sm text-blue-800">
+                    <strong>Tips:</strong>
+                  </p>
+                  <ul className="text-sm text-blue-700 mt-2 space-y-1 list-disc list-inside">
+                    <li>Make sure you entered the correct phone number</li>
+                    <li>Try the phone number you used when booking</li>
+                    <li>Call us at (216) 481-8696 for assistance</li>
+                  </ul>
                 </div>
               </div>
-
-              <div className="border-t pt-6">
-                <h4 className="font-semibold text-gray-900 mb-4">📷 Vehicle Damage Photos</h4>
-                <div className="mb-4">
-                  <label className={`btn-primary inline-flex items-center cursor-pointer ${uploadingPhoto === appointment.id ? 'opacity-50' : ''}`}>
-                    ➕ {uploadingPhoto === appointment.id ? `Uploading ${uploadProgress}%...` : 'Upload Photos'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      disabled={uploadingPhoto === appointment.id}
-                      onChange={(e) => handlePhotoUpload(appointment.id, e.target.files)}
-                      className="hidden"
-                    />
-                  </label>
-                  <p className="text-sm text-gray-600 mt-2">Max 5MB per photo. JPG, PNG, or HEIC format.</p>
+            ) : (
+              <>
+                <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                  <p className="text-green-800 font-semibold">
+                    ✅ Found {appointments.length} appointment{appointments.length > 1 ? 's' : ''} for{' '}
+                    {formatPhoneDisplay(phone)}
+                  </p>
                 </div>
 
-                {appointmentPhotos[appointment.id]?.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {appointmentPhotos[appointment.id].map((photo) => (
-                      <div key={photo.id} className="relative group">
-                        <img
-                          src={photo.photo_url}
-                          alt={photo.caption}
-                          className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 group-hover:border-primary cursor-pointer transition-all"
-                          onClick={() => window.open(photo.photo_url, '_blank')}
-                        />
-                        <p className="text-xs text-gray-600 mt-1 truncate">{photo.caption}</p>
-                        <span className="text-xs text-gray-500">
-                          {new Date(photo.created_at).toLocaleDateString()}
-                        </span>
+                {appointments.map((appointment) => (
+                  <div key={appointment.id} className="bg-white rounded-lg shadow-lg p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                          {appointment.customer_name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Service: {getServiceTypeLabel(appointment.service_type)}
+                        </p>
                       </div>
-                    ))}
+                      <span
+                        className={`px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(
+                          appointment.status
+                        )}`}
+                      >
+                        {appointment.status.toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">Date & Time:</p>
+                        <p className="text-gray-900">
+                          {appointment.appointment_date} at {appointment.appointment_time}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">Phone:</p>
+                        <p className="text-gray-900">{formatPhoneDisplay(appointment.customer_phone)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">Email:</p>
+                        <p className="text-gray-900">{appointment.customer_email}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">Submitted:</p>
+                        <p className="text-gray-900">
+                          {new Date(appointment.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    {appointment.vehicle_make && (
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <p className="text-sm font-semibold text-gray-700 mb-2">Vehicle Information:</p>
+                        <p className="text-gray-900">
+                          {appointment.vehicle_year} {appointment.vehicle_make} {appointment.vehicle_model}
+                        </p>
+                      </div>
+                    )}
+
+                    {appointment.damage_description && (
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm font-semibold text-gray-700 mb-2">Damage Description:</p>
+                        <p className="text-gray-900">{appointment.damage_description}</p>
+                      </div>
+                    )}
+
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                      <p className="text-sm text-gray-600 text-center">
+                        Questions? Call us at{' '}
+                        <a href="tel:+12164818696" className="text-red-600 font-semibold hover:underline">
+                          (216) 481-8696
+                        </a>
+                      </p>
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <p className="text-gray-600">No photos uploaded yet. Click "Upload Photos" to add images of vehicle damage.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                ))}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
