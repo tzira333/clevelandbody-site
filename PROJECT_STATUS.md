@@ -91,7 +91,7 @@
 - Status change notifications
 
 **Email Notifications (Postmark/SendGrid):**
-- Configurable recipients (default: domesticbody@gmail.com)
+- Configurable recipients (default: domesticandforeignab@gmail.com)
 - Same event coverage as SMS
 - HTML email templates
 - Plain text fallbacks
@@ -354,7 +354,7 @@ Proxy status: DNS only (gray cloud)
 - ✅ Tom Zovko (Advisor) - SMS + Email
 
 **Email Configuration:**
-- ✅ Default recipient: domesticbody@gmail.com
+- ✅ Default recipient: domesticandforeignab@gmail.com
 - ✅ Configurable via admin dashboard (when built)
 
 **Business Hours:**

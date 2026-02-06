@@ -62,7 +62,7 @@ This guide provides step-by-step instructions for deploying your application to 
 | `NEXT_PUBLIC_BUSINESS_PHONE` | +12164818696 | Production, Preview |
 | `NEXT_PUBLIC_BUSINESS_ADDRESS` | 17017 Saint Clair Ave, Cleveland, OH 44110 | Production, Preview |
 | `STAFF_SMS_RECIPIENTS` | +12162880668,+14405300810,+14407491081 | Production only |
-| `DEFAULT_EMAIL_RECIPIENTS` | domesticbody@gmail.com | Production only |
+| `DEFAULT_EMAIL_RECIPIENTS` | domesticandforeignab@gmail.com | Production only |
 | `INTERNAL_API_KEY` | Generate random string (e.g., `openssl rand -hex 32`) | Production only |
 
 ### Optional Variables (for future use)

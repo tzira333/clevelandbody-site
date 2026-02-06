@@ -349,7 +349,7 @@ CREATE POLICY "Admins can update notification settings"
 -- Insert default notification settings
 INSERT INTO public.notification_settings (setting_key, setting_value, description) VALUES
 ('sms_recipients', '{"recipients": ["+12162880668", "+14405300810", "+14407491081"]}', 'Staff SMS notification recipients'),
-('email_recipients', '{"recipients": ["domesticbody@gmail.com"]}', 'Email notification recipients'),
+('email_recipients', '{"recipients": ["domesticandforeignab@gmail.com"]}', 'Email notification recipients'),
 ('notification_events', '{
     "new_repair_case": {"sms": true, "email": true},
     "new_appointment": {"sms": true, "email": true},

@@ -33,7 +33,7 @@ A **complete, professional Next.js 14 full-stack web application** with:
   - Denise Zovko (President): +1-216-288-0668
   - Jerry Zovko (Vice President): +1-440-530-0810
   - Tom Zovko (Advisor): +1-440-749-1081
-  - Email: domesticbody@gmail.com (configurable)
+  - Email: domesticandforeignab@gmail.com (configurable)
 - **Business Hours**: Mon-Fri 8:00-16:30, Sat 9:00-13:00
 - **Appointment Slots**: 30-minute intervals
 - **Payment Options**: Call-only (infrastructure ready for Stripe)
@@ -184,7 +184,7 @@ Follow these steps to go live:
 - **Tom Zovko** (Advisor): +1-440-749-1081
 
 ### Email Recipients
-- Default: domesticbody@gmail.com
+- Default: domesticandforeignab@gmail.com
 - Configurable via admin dashboard (when built)
 
 ### Notification Events

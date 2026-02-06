@@ -92,8 +92,8 @@ export default function ContactForm() {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold text-gray-900">Email</h3>
-                  <a href="mailto:domesticbody@gmail.com" className="text-primary hover:underline">
-                    domesticbody@gmail.com
+                  <a href="mailto:domesticandforeignab@gmail.com" className="text-primary hover:underline">
+                    domesticandforeignab@gmail.com
                   </a>
                 </div>
               </div>

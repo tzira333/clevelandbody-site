@@ -158,7 +158,7 @@ NEXT_PUBLIC_BUSINESS_PHONE=+12164818696
 
 # Staff Notifications (Your phone numbers)
 STAFF_SMS_RECIPIENTS=+12162880668,+14405300810,+14407491081
-DEFAULT_EMAIL_RECIPIENTS=domesticbody@gmail.com
+DEFAULT_EMAIL_RECIPIENTS=domesticandforeignab@gmail.com
 
 # Generate a random key for API protection
 INTERNAL_API_KEY=generate_random_string_here

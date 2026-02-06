@@ -171,7 +171,7 @@ NEXT_PUBLIC_BUSINESS_PHONE=+12164818696
 
 # Staff Notifications (comma-separated E.164 format)
 STAFF_SMS_RECIPIENTS=+12162880668,+14405300810,+14407491081
-DEFAULT_EMAIL_RECIPIENTS=domesticbody@gmail.com
+DEFAULT_EMAIL_RECIPIENTS=domesticandforeignab@gmail.com
 ```
 
 ### 6. Run Development Server

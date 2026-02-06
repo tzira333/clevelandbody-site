@@ -213,8 +213,8 @@ export default function ContactForm() {
               <span className="text-xl">✉️</span>
               <div>
                 <p className="font-semibold text-gray-900 text-sm">Email</p>
-                <a href="mailto:domesticbody@gmail.com" className="text-primary hover:underline text-sm">
-                  domesticbody@gmail.com
+                <a href="mailto:domesticandforeignab@gmail.com" className="text-primary hover:underline text-sm">
+                  domesticandforeignab@gmail.com
                 </a>
               </div>
             </div>
