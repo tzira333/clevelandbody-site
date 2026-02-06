@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import './globals.css'
 import Footer from '@/components/layout/Footer'
-
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Domestic and Foreign Auto Body Inc. | Cleveland Auto Body Repair',
@@ -120,10 +119,9 @@ export default function RootLayout({
         />
       </head>
       <body>
-  <GoogleAnalytics />
-  {children}
-  <Footer />  {/* Add this line */}
-</body>
-</html>
+        {children}
+        <Footer />
+      </body>
+    </html>
   )
 }
