@@ -158,7 +158,7 @@ export default function TermsOfServicePage() {
                 <li>Texting STOP to any SMS message</li>
                 <li>Clicking "unsubscribe" in emails</li>
                 <li>Calling (216) 481-8696</li>
-                <li>Emailing info@clevelandbody.com</li>
+                <li>Emailing domesticandforeignab@gmail.com</li>
               </ul>
               <p className="text-gray-800 leading-relaxed mt-4 italic">
                 Note: Opting out may affect our ability to provide service updates regarding your vehicle.
@@ -447,8 +447,8 @@ export default function TermsOfServicePage() {
             </p>
             <p className="text-gray-700">
               <strong>Email:</strong>{' '}
-              <a href="mailto:info@clevelandbody.com" className="text-red-600 hover:underline">
-                info@clevelandbody.com
+              <a href="mailto:domesticandforeignab@gmail.com" className="text-red-600 hover:underline">
+                domesticandforeignab@gmail.com
               </a>
             </p>
           </div>

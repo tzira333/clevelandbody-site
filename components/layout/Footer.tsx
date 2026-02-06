@@ -70,8 +70,8 @@ export default function Footer() {
               </p>
               <p className="flex items-center gap-2">
                 <span>📧</span>
-                <a href="mailto:info@clevelandbody.com" className="hover:text-white transition-colors">
-                  info@clevelandbody.com
+                <a href="mailto:domesticandforeignab@gmail.com" className="hover:text-white transition-colors">
+                  domesticandforeignab@gmail.com
                 </a>
               </p>
               <div className="mt-4">
