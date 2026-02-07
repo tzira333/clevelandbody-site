@@ -1,5 +1,5 @@
-import StaffAuthCheck from './StaffAuthCheck';
-import StaffDashboard from './StaffDashboard';
+import StaffAuthCheck from 'StaffAuthCheck';
+import StaffDashboard from 'StaffDashboard';
 
 export const metadata = {
   title: 'Staff Dashboard | Domestic and Foreign Auto Body Inc.',
