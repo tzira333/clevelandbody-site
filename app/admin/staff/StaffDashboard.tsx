@@ -3,8 +3,20 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClientComponentClient();
+const router = useRouter();
+
+const handleLogout = async () => {
+  await supabase.auth.signOut();
+  router.push('/admin/staff/login');
+  router.refresh();
+};
+
 
 interface Appointment {
   id: string
@@ -111,7 +123,18 @@ function NoteModal({ appointment, onClose, onSave }: NoteModalProps) {
           </div>
 
           {/* Buttons */}
+
           <div className="flex gap-3">
+<button
+  onClick={handleLogout}
+  className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
+>
+  Logout
+</button>
+
+
+
+
             <button
               onClick={handleSave}
               disabled={saving}
