@@ -1,21 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createBrowserClient } from '@supabase/ssr';
-const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-import { useRouter } from 'next/navigation';
-
-const router = useRouter();
-
-const handleLogout = async () => {
-  await supabase.auth.signOut();
-  router.push('/admin/staff/login');
-  router.refresh();
-};
-
+import { createBrowserClient } from '@supabase/ssr'
+import { useRouter } from 'next/navigation'
 
 interface Appointment {
   id: string
@@ -23,584 +10,384 @@ interface Appointment {
   customer_phone: string
   customer_email: string
   service_type: string
+  vehicle_info: string
+  damage_description: string
   appointment_date: string
   appointment_time: string
   status: string
-  vehicle_year?: string
-  vehicle_make?: string
-  vehicle_model?: string
-  damage_description?: string
-  insurance_claim?: string
-  message?: string
-  staff_notes?: string
   created_at: string
-  archived_at?: string
-}
-
-interface NoteModalProps {
-  appointment: Appointment
-  onClose: () => void
-  onSave: (id: string, notes: string) => void
-}
-
-function NoteModal({ appointment, onClose, onSave }: NoteModalProps) {
-  const [notes, setNotes] = useState(appointment.staff_notes || '')
-  const [saving, setSaving] = useState(false)
-
-  const handleSave = async () => {
-    setSaving(true)
-    await onSave(appointment.id, notes)
-    setSaving(false)
-    onClose()
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Staff Notes</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                {appointment.customer_name} - {appointment.service_type}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Appointment Details */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span className="font-semibold text-gray-700">Date:</span>{' '}
-                <span className="text-gray-900">{appointment.appointment_date}</span>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-700">Time:</span>{' '}
-                <span className="text-gray-900">{appointment.appointment_time}</span>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-700">Phone:</span>{' '}
-                <span className="text-gray-900">{appointment.customer_phone}</span>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-700">Status:</span>{' '}
-                <span className={`font-semibold ${
-                  appointment.status === 'completed' ? 'text-green-600' :
-                  appointment.status === 'in-progress' ? 'text-blue-600' :
-                  'text-yellow-600'
-                }`}>
-                  {appointment.status}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Notes Textarea */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Internal Staff Notes
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={10}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-              placeholder="Add internal notes about this request...&#10;&#10;Examples:&#10;- Called customer to confirm details&#10;- Parts ordered on [date]&#10;- Vehicle dropped off at [time]&#10;- Special instructions from customer&#10;- Follow-up needed"
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              These notes are only visible to staff members and will not be shared with customers.
-            </p>
-          </div>
-
-          {/* Buttons */}
-
-          <div className="flex gap-3">
-<button
-  onClick={handleLogout}
-  className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
->
-  Logout
-</button>
-
-
-
-
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Saving...
-                </span>
-              ) : (
-                '💾 Save Notes'
-              )}
-            </button>
-            <button
-              onClick={onClose}
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+  updated_at: string
 }
 
 export default function StaffDashboard() {
+  const router = useRouter()
   const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [archivedAppointments, setArchivedAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<'active' | 'archived'>('active')
+  const [error, setError] = useState('')
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
-  const [showNoteModal, setShowNoteModal] = useState(false)
-  const [filterStatus, setFilterStatus] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey)
+  // Create Supabase client (SINGLE DEFINITION)
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   useEffect(() => {
     fetchAppointments()
-  }, [view])
+  }, [])
 
   const fetchAppointments = async () => {
-    setLoading(true)
     try {
-      let query = supabase
+      setLoading(true)
+      setError('')
+
+      const { data, error: fetchError } = await supabase
         .from('appointments')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (view === 'active') {
-        query = query.is('archived_at', null)
-      } else {
-        query = query.not('archived_at', 'is', null)
-      }
+      if (fetchError) throw fetchError
 
-      const { data, error } = await query
-
-      if (error) throw error
-
-      if (view === 'active') {
-        setAppointments(data || [])
-      } else {
-        setArchivedAppointments(data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching appointments:', error)
+      setAppointments(data || [])
+    } catch (err) {
+      console.error('Error fetching appointments:', err)
+      setError('Failed to load appointments')
     } finally {
       setLoading(false)
     }
   }
 
-  const updateStatus = async (id: string, newStatus: string) => {
+  const handleLogout = async () => {
     try {
-      const { error } = await supabase
-        .from('appointments')
-        .update({ status: newStatus })
-        .eq('id', id)
-
-      if (error) throw error
-
-      // Update local state
-      setAppointments(prev =>
-        prev.map(apt => apt.id === id ? { ...apt, status: newStatus } : apt)
-      )
-    } catch (error) {
-      console.error('Error updating status:', error)
-      alert('Failed to update status')
+      await supabase.auth.signOut()
+      router.push('/admin/staff/login')
+    } catch (err) {
+      console.error('Error signing out:', err)
     }
   }
 
-  const archiveAppointment = async (id: string) => {
-    const appointment = appointments.find(apt => apt.id === id)
-    
-    if (!appointment) return
-
-    // Check if status is completed
-    if (appointment.status !== 'completed') {
-      const confirmArchive = confirm(
-        'This appointment is not marked as completed. Are you sure you want to archive it?'
-      )
-      if (!confirmArchive) return
-    }
-
+  const updateAppointmentStatus = async (id: string, newStatus: string) => {
     try {
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('appointments')
         .update({ 
-          archived_at: new Date().toISOString(),
-          status: appointment.status === 'completed' ? 'completed' : appointment.status
+          status: newStatus,
+          updated_at: new Date().toISOString()
         })
         .eq('id', id)
 
-      if (error) throw error
+      if (updateError) throw updateError
 
-      // Remove from active list
-      setAppointments(prev => prev.filter(apt => apt.id !== id))
-      
-      alert('✅ Appointment archived successfully!')
-    } catch (error) {
-      console.error('Error archiving appointment:', error)
-      alert('Failed to archive appointment')
+      // Refresh appointments
+      fetchAppointments()
+      setSelectedAppointment(null)
+    } catch (err) {
+      console.error('Error updating appointment:', err)
+      alert('Failed to update appointment status')
     }
   }
 
-  const unarchiveAppointment = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('appointments')
-        .update({ archived_at: null })
-        .eq('id', id)
-
-      if (error) throw error
-
-      // Remove from archived list
-      setArchivedAppointments(prev => prev.filter(apt => apt.id !== id))
-      
-      alert('✅ Appointment restored successfully!')
-    } catch (error) {
-      console.error('Error unarchiving appointment:', error)
-      alert('Failed to restore appointment')
-    }
-  }
-
-  const saveNotes = async (id: string, notes: string) => {
-    try {
-      const { error } = await supabase
-        .from('appointments')
-        .update({ staff_notes: notes })
-        .eq('id', id)
-
-      if (error) throw error
-
-      // Update local state
-      if (view === 'active') {
-        setAppointments(prev =>
-          prev.map(apt => apt.id === id ? { ...apt, staff_notes: notes } : apt)
-        )
-      } else {
-        setArchivedAppointments(prev =>
-          prev.map(apt => apt.id === id ? { ...apt, staff_notes: notes } : apt)
-        )
-      }
-
-      alert('✅ Notes saved successfully!')
-    } catch (error) {
-      console.error('Error saving notes:', error)
-      alert('Failed to save notes')
-    }
-  }
-
-  const openNoteModal = (appointment: Appointment) => {
-    setSelectedAppointment(appointment)
-    setShowNoteModal(true)
-  }
-
-  const getServiceTypeBadge = (serviceType: string) => {
-    const types: Record<string, { label: string; color: string }> = {
-      'express-care': { label: '⚡ Express Care', color: 'bg-red-100 text-red-800 border-red-300' },
-      'schedule': { label: '📅 Schedule', color: 'bg-blue-100 text-blue-800 border-blue-300' },
-      'tow-service': { label: '🚛 Tow Service', color: 'bg-orange-100 text-orange-800 border-orange-300' },
-      'contact-inquiry': { label: '💬 Contact', color: 'bg-gray-100 text-gray-800 border-gray-300' },
-    }
-    
-    const type = types[serviceType] || { label: serviceType, color: 'bg-gray-100 text-gray-800' }
+  const filteredAppointments = appointments.filter(apt => {
+    const query = searchQuery.toLowerCase()
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${type.color}`}>
-        {type.label}
-      </span>
+      apt.customer_name.toLowerCase().includes(query) ||
+      apt.customer_phone.includes(query) ||
+      apt.customer_email.toLowerCase().includes(query) ||
+      apt.vehicle_info.toLowerCase().includes(query) ||
+      apt.status.toLowerCase().includes(query)
     )
-  }
+  })
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusBadgeColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800 border-blue-300'
+      case 'in-progress':
+        return 'bg-purple-100 text-purple-800 border-purple-300'
       case 'completed':
         return 'bg-green-100 text-green-800 border-green-300'
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800 border-blue-300'
       case 'cancelled':
         return 'bg-red-100 text-red-800 border-red-300'
       default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+        return 'bg-gray-100 text-gray-800 border-gray-300'
     }
   }
 
-  const filteredAppointments = (view === 'active' ? appointments : archivedAppointments).filter(apt => {
-    const matchesStatus = filterStatus === 'all' || apt.status === filterStatus
-    const matchesSearch = 
-      apt.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      apt.customer_phone.includes(searchQuery) ||
-      apt.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    return matchesStatus && matchesSearch
-  })
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <svg className="animate-spin h-12 w-12 text-red-600 mx-auto mb-4" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-          <p className="text-gray-600 font-semibold">Loading appointments...</p>
-        </div>
-      </div>
-    )
+  const formatTime = (timeString: string) => {
+    return timeString
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Staff Dashboard</h1>
-              <p className="text-gray-600 mt-1">Manage appointments and requests</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Cleveland Auto Body - Staff Portal
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Appointment Management Dashboard
+              </p>
             </div>
-            
-            {/* View Toggle */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setView('active')}
-                className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-                  view === 'active'
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                📋 Active ({appointments.length})
-              </button>
-              <button
-                onClick={() => setView('archived')}
-                className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-                  view === 'archived'
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                📦 Archived ({archivedAppointments.length})
-              </button>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="mt-6 flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="🔍 Search by name, phone, or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Status Filter */}
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-
             <button
-              onClick={fetchAppointments}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
             >
-              🔄 Refresh
+              Logout
             </button>
           </div>
         </div>
+      </header>
 
-        {/* Appointments List */}
-        <div className="space-y-4">
-          {filteredAppointments.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-              <div className="text-6xl mb-4">
-                {view === 'active' ? '📭' : '📦'}
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {view === 'active' ? 'No Active Appointments' : 'No Archived Appointments'}
-              </h3>
-              <p className="text-gray-600">
-                {view === 'active' 
-                  ? 'All appointments are up to date!' 
-                  : 'No appointments have been archived yet.'}
-              </p>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Bar */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search appointments by name, phone, email, vehicle, or status..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="text-sm text-gray-600">Total Appointments</div>
+            <div className="text-2xl font-bold text-gray-900">{appointments.length}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="text-sm text-gray-600">Pending</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {appointments.filter(a => a.status === 'pending').length}
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="text-sm text-gray-600">Confirmed</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {appointments.filter(a => a.status === 'confirmed').length}
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="text-sm text-gray-600">In Progress</div>
+            <div className="text-2xl font-bold text-purple-600">
+              {appointments.filter(a => a.status === 'in-progress').length}
+            </div>
+          </div>
+        </div>
+
+        {/* Appointments Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Appointments ({filteredAppointments.length})
+            </h2>
+          </div>
+
+          {loading ? (
+            <div className="p-8 text-center text-gray-500">
+              Loading appointments...
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center text-red-600">
+              {error}
+            </div>
+          ) : filteredAppointments.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              No appointments found
             </div>
           ) : (
-            filteredAppointments.map((appointment) => (
-              <div key={appointment.id} className="bg-white rounded-lg shadow-lg p-6">
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                  {/* Left: Appointment Info */}
-                  <div className="flex-1">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-bold text-gray-900">
-                            {appointment.customer_name}
-                          </h3>
-                          {getServiceTypeBadge(appointment.service_type)}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Contact
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Vehicle
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Service
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date/Time
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredAppointments.map((appointment) => (
+                    <tr key={appointment.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {appointment.customer_name}
                         </div>
-                        
-                        <div className="space-y-1 text-sm text-gray-600">
-                          <p>📞 {appointment.customer_phone}</p>
-                          <p>📧 {appointment.customer_email}</p>
-                          <p>📅 {appointment.appointment_date} at {appointment.appointment_time}</p>
-                          
-                          {appointment.vehicle_make && (
-                            <p>🚗 {appointment.vehicle_year} {appointment.vehicle_make} {appointment.vehicle_model}</p>
-                          )}
-                          
-                          {appointment.damage_description && (
-                            <p className="mt-2">
-                              <span className="font-semibold">Damage:</span> {appointment.damage_description}
-                            </p>
-                          )}
-                          
-                          {appointment.message && (
-                            <p className="mt-2">
-                              <span className="font-semibold">Message:</span> {appointment.message}
-                            </p>
-                          )}
-
-                          {appointment.staff_notes && (
-                            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                              <p className="font-semibold text-blue-800 mb-1">📝 Staff Notes:</p>
-                              <p className="text-blue-900 whitespace-pre-wrap">{appointment.staff_notes}</p>
-                            </div>
-                          )}
+                        <div className="text-xs text-gray-500">
+                          Created: {formatDate(appointment.created_at)}
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Status Badge */}
-                    <div className="mt-3">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(appointment.status)}`}>
-                        Status: {appointment.status}
-                      </span>
-                      {appointment.archived_at && (
-                        <span className="ml-2 inline-block px-3 py-1 rounded-full text-xs font-semibold border bg-gray-100 text-gray-800 border-gray-300">
-                          📦 Archived on {new Date(appointment.archived_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">{appointment.customer_phone}</div>
+                        <div className="text-xs text-gray-500">{appointment.customer_email}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">{appointment.vehicle_info}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 capitalize">
+                          {appointment.service_type.replace(/-/g, ' ')}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{formatDate(appointment.appointment_date)}</div>
+                        <div className="text-xs text-gray-500">{formatTime(appointment.appointment_time)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusBadgeColor(appointment.status)}`}>
+                          {appointment.status}
                         </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right: Actions */}
-                  <div className="flex flex-col gap-2 lg:w-48">
-                    {view === 'active' && (
-                      <>
-                        {/* Status Update */}
-                        <select
-                          value={appointment.status}
-                          onChange={(e) => updateStatus(appointment.id, e.target.value)}
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="in-progress">In Progress</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-
-                        {/* Add/Edit Notes */}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
-                          onClick={() => openNoteModal(appointment)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-2"
+                          onClick={() => setSelectedAppointment(appointment)}
+                          className="text-blue-600 hover:text-blue-900 font-medium"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                          {appointment.staff_notes ? 'Edit Notes' : 'Add Notes'}
+                          View Details
                         </button>
-
-                        {/* Archive Button */}
-                        <button
-                          onClick={() => archiveAppointment(appointment.id)}
-                          className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm flex items-center justify-center gap-2 ${
-                            appointment.status === 'completed'
-                              ? 'bg-green-600 text-white hover:bg-green-700'
-                              : 'bg-gray-600 text-white hover:bg-gray-700'
-                          }`}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                          </svg>
-                          Archive
-                        </button>
-                      </>
-                    )}
-
-                    {view === 'archived' && (
-                      <>
-                        {/* View Notes (Read-only) */}
-                        <button
-                          onClick={() => openNoteModal(appointment)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          View Notes
-                        </button>
-
-                        {/* Unarchive Button */}
-                        <button
-                          onClick={() => unarchiveAppointment(appointment.id)}
-                          className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition-colors text-sm flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                          </svg>
-                          Restore
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
-      </div>
+      </main>
 
-      {/* Note Modal */}
-      {showNoteModal && selectedAppointment && (
-        <NoteModal
-          appointment={selectedAppointment}
-          onClose={() => {
-            setShowNoteModal(false)
-            setSelectedAppointment(null)
-          }}
-          onSave={saveNotes}
-        />
+      {/* Appointment Detail Modal */}
+      {selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Appointment Details
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Created: {formatDate(selectedAppointment.created_at)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedAppointment(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <span className="text-2xl">&times;</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Customer Info */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Customer Information</h4>
+                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                  <p><span className="font-medium">Name:</span> {selectedAppointment.customer_name}</p>
+                  <p><span className="font-medium">Phone:</span> {selectedAppointment.customer_phone}</p>
+                  <p><span className="font-medium">Email:</span> {selectedAppointment.customer_email}</p>
+                </div>
+              </div>
+
+              {/* Vehicle Info */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Vehicle Information</h4>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p>{selectedAppointment.vehicle_info}</p>
+                </div>
+              </div>
+
+              {/* Service Details */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Service Details</h4>
+                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                  <p><span className="font-medium">Service Type:</span> {selectedAppointment.service_type.replace(/-/g, ' ')}</p>
+                  <p><span className="font-medium">Preferred Date:</span> {formatDate(selectedAppointment.appointment_date)}</p>
+                  <p><span className="font-medium">Preferred Time:</span> {formatTime(selectedAppointment.appointment_time)}</p>
+                </div>
+              </div>
+
+              {/* Damage Description */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Damage Description</h4>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p>{selectedAppointment.damage_description || 'No description provided'}</p>
+                </div>
+              </div>
+
+              {/* Current Status */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Current Status</h4>
+                <span className={`px-3 py-1 inline-flex text-sm font-semibold rounded-full border ${getStatusBadgeColor(selectedAppointment.status)}`}>
+                  {selectedAppointment.status}
+                </span>
+              </div>
+
+              {/* Update Status */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Update Status</h4>
+                <div className="flex flex-wrap gap-2">
+                  {['pending', 'confirmed', 'in-progress', 'completed', 'cancelled'].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => updateAppointmentStatus(selectedAppointment.id, status)}
+                      disabled={selectedAppointment.status === status}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        selectedAppointment.status === status
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setSelectedAppointment(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
