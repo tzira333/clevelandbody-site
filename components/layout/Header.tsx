@@ -114,11 +114,11 @@ export default function Header() {
                 Contact
               </Link>
 
-              {/* Customer Portal with Tooltip */}
+              {/* Customer Portal with Tooltip - FIXED WIDTH */}
               <div className="relative group">
                 <Link
                   href="/portal"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                  className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap"
                   onMouseEnter={() => setShowTooltip(true)}
                   onMouseLeave={() => setShowTooltip(false)}
                 >
@@ -132,9 +132,10 @@ export default function Header() {
                 )}
               </div>
 
+              {/* Staff Portal - MATCHING WIDTH */}
               <Link
                 href="/admin/staff"
-                className="bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-900 transition-colors"
+                className="bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-900 transition-colors whitespace-nowrap"
               >
                 Staff Portal
               </Link>
