@@ -1,4 +1,4 @@
-import ScheduleForm from '@/components/schedule/ScheduleForm';
+import ScheduleForm from '@/app/schedule/ScheduleForm';
 
 export const metadata = {
   title: 'Schedule an Appointment | Domestic and Foreign Auto Body Inc.',
