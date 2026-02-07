@@ -1,4 +1,3 @@
-import { Metadata } from 'next'
 import ScheduleForm from '@/components/schedule/ScheduleForm';
 
 export const metadata = {
