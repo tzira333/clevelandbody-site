@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import ScheduleForm from '@/components/schedule/ScheduleForm';
+import ScheduleForm from '@/apps/schedule/ScheduleForm';
 
 export const metadata = {
   title: 'Schedule an Appointment | Domestic and Foreign Auto Body Inc.',
